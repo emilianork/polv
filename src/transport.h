@@ -40,3 +40,13 @@ struct transport {
 	enum protocol protocol;
 	void* transport;
 };
+
+
+/* @param  El paquete ip o arp, sin la cabecera de ethernet.
+   @return La cabecera de la capa de transporte */
+const u_char* transport_head(const u_char*);
+
+/* @param    Cabezera de la capa de transporte.
+   @ return  El protocolo de la capa de transporte.
+ regresa el protocolo de la capa de transporte */
+enum protocol transport_protocol(const u_char*);

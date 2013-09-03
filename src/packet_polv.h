@@ -2,7 +2,7 @@
 #include "network.h"
 #include "transport.h"
 
-struct osi_model {
+struct packet_povl {
 	struct data_link* data_link;
 	struct network* network;
 	struct transport* transport;

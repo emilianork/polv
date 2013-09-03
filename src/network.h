@@ -38,3 +38,14 @@ struct network {
 	enum net_protocol protocol;
 	void* protocol_header;
 };
+
+/* @param   El paquete capturado con libpcap, 
+   @return  La cabecera de la capa de red */
+const u_char* network_head(const u_char*);
+
+/*
+  @param   Cabecera de la paca de red.
+  @return  El protocolo de la capa de red utilizado.
+  
+ */
+enum net_protocol network_protocol(const u_char*);
