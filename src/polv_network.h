@@ -8,7 +8,6 @@ enum polv_net_protocol {
 	ARP
 };
 
-
 struct polv_ip {
 
 	const u_char* version;

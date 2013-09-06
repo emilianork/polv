@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <iostream>
 
+using namespace std;
+
 struct polv_queue* polv_queue_init()
 {
 	struct polv_queue* queue;
@@ -11,7 +13,7 @@ struct polv_queue* polv_queue_init()
 	queue = (struct polv_queue*) malloc(sizeof(struct polv_queue));
 
 	if (queue == NULL) {
-		std::cout << "\nNo se encontro memoria disponible." << std::endl;
+		cout << "\nNo se encontro memoria disponible." << endl;
 		exit(EXIT_FAILURE);
 	}
 	queue->front = queue->back = NULL;
@@ -37,7 +39,7 @@ struct polv_queue_item* polv_queue_item_init()
 	item = (struct polv_queue_item*) malloc(sizeof(struct polv_queue_item));
 	
 	if (item == NULL) {
-		std::cout << "\nNo se encontro memoria disponible." << std::endl;
+		cout << "\nNo se encontro memoria disponible." << endl;
 		exit(EXIT_FAILURE);
 	}
 
