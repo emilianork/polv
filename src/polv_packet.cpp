@@ -35,5 +35,6 @@ struct polv_packet* polv_packet_init()
 void polv_packet_destroy(struct polv_packet* packet)
 {
 	polv_data_link_destroy(packet->data_link);
+	polv_network_destroy(packet->network);
 	free(packet);
 }

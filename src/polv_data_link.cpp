@@ -17,15 +17,25 @@ struct polv_data_link* polv_data_link_init()
 		exit(EXIT_FAILURE);
 	}
 	
-	data_link->dst = data_link->src =  data_link->ethertype = NULL;
-	
+	data_link->dst = data_link->src =  data_link->ethertype = 
+		data_link->dsap = data_link->ssap = data_link->control = NULL;
+
 	return data_link;
 }
 
 
 void polv_data_link_destroy(struct polv_data_link* data_link)
 {
+	free((u_char*)data_link->dst);
+	free((u_char*)data_link->src);
+	free((u_char*)data_link->ethertype);
+	free((u_char*)data_link->dsap);
+	free((u_char*)data_link->ssap);
+	free((u_char*)data_link->control);
+	
 	free(data_link);
+
+	return;
 }
 
 const u_char* polv_ether_dst(const u_char* packet)
