@@ -12,8 +12,9 @@ struct polv_packet {
 	struct polv_transport* transport;
 };
 
-struct polv_packet* polv_packet_init();
 
+/* Funciones para el manejo de la estructura */
+struct polv_packet* polv_packet_init();
 void polv_packet_destroy(struct polv_packet*);
 
 #endif POLV_PACKET_H_
