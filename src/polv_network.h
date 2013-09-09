@@ -4,11 +4,11 @@
 #include "polv_types.h"
 
 enum polv_net_protocol {
-	IP,
+	IPV4,
 	ARP
 };
 
-struct polv_ip {
+struct polv_ip_v4 {
 
 	const u_char* version;
 	const u_char* ihl;

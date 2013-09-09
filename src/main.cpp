@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	const u_char *packet;
 	struct pcap_pkthdr hdr;
 
-	int count = 10;
+	int count = 1;
 	
 	dev = argv[1];
 	
@@ -61,11 +61,14 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 	type = polv_ether_ver(packet);
 	
 	printf("Paquete:   ");
-	for(i = 0; i < 14; i++) {
-		printf("%02x:",packet[i]);
+	for(i = 0; i < header->len; i++) {
+		if (i + 1 != header->len)
+			printf("%02x:",packet[i]);
+		else
+			printf("%02x",packet[i]);
 	}
 
-	printf("     Destino: ");
+	printf("\n     Destino: ");
 	for(i = 0; i < 6 ; i++) {
 	    printf("%02x:",dst[i]);
 	}
@@ -86,6 +89,19 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 	}
 
 	printf("\n");
+	int len = header->len - 14;
+
+	const u_char* header_network;
+	
+	header_network = polv_network_header(packet,type,len);
+
+	printf("Paquete: ");
+	for(i = 0; i < len ; i++) {
+		if ( i + 1 != len)
+			printf("%02x:",header_network[i]);
+		else
+			printf("%02x\n",header_network[i]);
+	}
 
 	return;
 }
