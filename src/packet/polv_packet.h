@@ -1,9 +1,9 @@
 #ifndef POLV_PACKET_H_
 #define POLV_PACKET_H_
 
-#include "polv_data_link.h"
-#include "polv_network.h"
-#include "polv_transport.h"
+#include "data_link/polv_data_link.h"
+#include "network/polv_network.h"
+#include "transport/polv_transport.h"
 
 
 struct polv_packet {

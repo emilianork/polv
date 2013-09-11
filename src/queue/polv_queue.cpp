@@ -1,5 +1,5 @@
-#include "polv_queue.h"
-#include "polv_boolean.h"
+#include "queue/polv_queue.h"
+#include "tools/polv_boolean.h"
 
 #include <cstdlib>
 #include <iostream>

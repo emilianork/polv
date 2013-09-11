@@ -1,5 +1,5 @@
-#include "polv_data_link.h"
-#include "polv_tools.h"
+#include "data_link/polv_data_link.h"
+#include "tools/polv_tools.h"
 
 #include <cstdlib>
 #include <iostream>

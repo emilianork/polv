@@ -1,7 +1,7 @@
 #ifndef POLV_TRANSPORT_H
 #define POLV_TRANSPORT_H_
 
-#include "polv_types.h"
+#include "tools/polv_types.h"
 
 enum polv_trans_protocol {
 	TCP,

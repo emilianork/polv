@@ -1,7 +1,7 @@
 #ifndef POLV_NETWORK_H_
 #define POLV_NETWORK_H_
 
-#include "polv_types.h"
+#include "tools/polv_types.h"
 
 enum polv_net_protocol {
 	IPV4,

@@ -1,10 +1,10 @@
-#include "polv_queue.h"
-#include "polv_packet.h"
+#include "queue/polv_queue.h"
+#include "packet/polv_packet.h"
 
 #include "test/test.h"
 #include "test/queue_test.h"
 
-#include "polv_boolean.h"
+#include "tools/polv_boolean.h"
 
 #include <cstdlib>
 #include <cstdio>
