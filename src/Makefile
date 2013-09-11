@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-I.
 PCAP=$(CFLAGS)
 PCAP+=-lpcap
-DEPS = polv_packet.h polv_data_link.h polv_queue.h polv_types.h polv_boolean.h  polv_network.h polv_transport.h polv_tools.h polv_ip_v4.h polv_ip_v6.h polv_arp.h
+DEPS = polv_packet.h data_link/polv_data_link.h queue/polv_queue.h tools/polv_types.h tools/polv_boolean.h network/polv_network.h transport/polv_transport.h tools/polv_tools.h network/polv_ip_v4.h network/polv_ip_v6.h network/polv_arp.h
 OBJ = main.o polv_packet.o polv_data_link.o polv_network.o polv_transport.o polv_queue.o polv_tools.o polv_ip_v4.o polv_ip_v6.o polv_arp.o
 
 %.o: %.cpp $(DEPS)

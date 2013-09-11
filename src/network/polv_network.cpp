@@ -37,5 +37,3 @@ void polv_network_destroy(struct polv_network* network)
 	}
 	free(network);
 }
-
-
