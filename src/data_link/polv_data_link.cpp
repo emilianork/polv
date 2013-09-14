@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <iostream>
 
-u_char etherII[2] = {6,0};
-u_char len[2] = {5,220};
+const u_char etherII[2] = {6,0};
+const u_char len[2] = {5,220};
 
 using namespace std;
 
@@ -62,12 +62,11 @@ enum polv_ethertype polv_ether_ver(const u_char* packet)
 
 	const u_char* type;
 	type = polv_oct(TYPE,TYPE_LEN,packet);
-
-	if (type > etherII) {
-		return V802;
+	if (polv_compare(type,etherII,TYPE_LEN) == 1) {
+		return VII;
 	} else {
-		if (type < len) {
-			return VII;
+		if (polv_compare(type,len,TYPE_LEN) == -1) {
+			return V802;
 		} else {
 			cout << "\nProtocolo de capa de enlace, desconocido." << endl;
 			exit(EXIT_FAILURE);

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	const u_char *packet;
 	struct pcap_pkthdr hdr;
 
-	int count = 1;
+	int count = 1000;
 	
 	dev = argv[1];
 	
@@ -66,20 +66,36 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 
 	enum polv_net_protocol arp = polv_network_protocol(ethertype);
 
-	if (arp == ARP) {
-
-	printf("Paquete:   ");
-	for(i = 0; i < header->len; i++) {
-		if (i + 1 != header->len)
-			printf("%02x:",packet[i]);
-		else
-			printf("%02x",packet[i]);
-	}
+	if (arp == IPV4) {
+		printf("IPV4\n");
 	}
 	
-	printf("\n");
+	if (arp == IPV6) {
+		printf("IPV6\n");
+		
+		printf("Paquete:   ");
+		for(i = 0; i < header->len; i++) {
+			if (i + 1 != header->len)
+				printf("%02x:",packet[i]);
+			else
+				printf("%02x\n",packet[i]);
+		}
+		exit(0);
+	}
+	
+	if (arp == ARP) {
+		printf("ARP\n");
+		
+		printf("Paquete:   ");
+		for(i = 0; i < header->len; i++) {
+			if (i + 1 != header->len)
+				printf("%02x:",packet[i]);
+			else
+				printf("%02x\n",packet[i]);
+		}
+	}
 
-	printf("ARP: ");
+	printf("\n");
 	
 	
 

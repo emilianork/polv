@@ -7,6 +7,14 @@
    @param len
    @param packet
    @return El paquete completo*/
-const hex* polv_oct(int,int,const u_char*);
+const u_char* polv_oct(int,int,const u_char*);
 
+/*
+  @param first
+  @param two
+  @param len
+  @return -1 si first < two, 0 si first == two y 1 si first > two
+**/
+int polv_compare(const u_char*,const u_char*,int);
 #endif POLV_TOOLS_H_
+

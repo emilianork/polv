@@ -1,14 +1,18 @@
+#include "data_link/polv_data_link.h"
+
 #include "network/polv_network.h"
 #include "network/polv_ip_v4.h"
 #include "network/polv_ip_v6.h"
 #include "network/polv_arp.h"
 
+#include "tools/polv_tools.h"
+
 #include <cstdlib>
 #include <iostream>
 
-u_char arp[2] = {8,6};
-u_char ipv4[2] = {8,0};
-u_char ipv6[2] = {134, 221};
+const u_char arp[2] = {8,6};
+const u_char ipv4[2] = {8,0};
+const u_char ipv6[2] = {134, 221};
 
 using namespace std;
 
@@ -44,12 +48,14 @@ void polv_network_destroy(struct polv_network* network)
 
 enum polv_net_protocol polv_network_protocol(const u_char* ethertype)
 {
-	if (arp == ethertype) 
+	
+	if (polv_compare(arp, ethertype,TYPE_LEN) == 0) 
 		return ARP;
-	if (ipv4 == ethertype)
+	if (polv_compare(ipv4, ethertype,TYPE_LEN) == 0)
 		return IPV4;
-	if (ipv6 == ethertype)
+	if (polv_compare(ipv6, ethertype,TYPE_LEN) == 0)
 		return IPV6;
-	else
-		exit(EXIT_FAILURE);
+	//std::count << "Protocolo de red, no soportado" << std::endl;
+	
+	return IPV6;
 }

@@ -2,9 +2,8 @@
 
 #include <iostream>
 
-const hexadecimal* polv_oct(int from, int len, const u_char* packet) 
+const u_char* polv_oct(int from, int len, const u_char* packet) 
 {
-	hexadecimal* hex;
 	u_char* octs;
 	
 	octs = (u_char*) malloc(sizeof(u_char));
@@ -15,9 +14,18 @@ const hexadecimal* polv_oct(int from, int len, const u_char* packet)
 		octs[i] = packet[from + i];
 	}
 
-	hex = (hexadecimal*) malloc(sizeof(hexadecimal));
-
-	hex->octs = (const u_char*) octs;
-	hex->len = len;
-	return ((const hexadecimal) hex);
+	return ((const u_char*) octs);
 }
+
+int polv_compare(const u_char* first,const  u_char* two, int len)
+{
+	int i;
+	for(i = 0; i < len; i++) {
+		if (first[i] < two[i])
+			return -1;
+		if (first[i] > two[i])
+			return 1;
+	}
+	return 0;
+}
+
