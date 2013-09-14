@@ -1,6 +1,7 @@
 #include "tools/polv_tools.h"
 
 #include <iostream>
+#include <cstdlib>
 
 const u_char* polv_oct(int from, int len, const u_char* packet) 
 {
