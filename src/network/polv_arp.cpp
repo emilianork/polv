@@ -35,37 +35,66 @@ void polv_arp_destroy(struct polv_arp* arp)
 
 const u_char* polv_arp_htype(const u_char* packet)
 {
-	return NULL;
+	const u_char* htype;
+	htype = polv_oct(HTYPE,HTYPE_LEN,packet);
+	
+	return htype;
 }
 
 const u_char* polv_arp_ptype(const u_char* packet)
 {
-	return NULL;
+    const u_char* ptype;
+	ptype = polv_oct(PTYPE,PTYPE_LEN,packet);
+
+	return ptype;
 }
 const u_char* polv_arp_hlen(const u_char* packet)
 {
-	return NULL;
+	const u_char* hlen;
+	hlen = polv_oct(HLEN, HLEN_LEN,packet);
+
+	return hlen;
+	
 }
 const u_char* polv_arp_plen(const u_char* packet)
 {
-	return NULL;
+	const u_char* plen;
+	plen = polv_oct(PLEN, PLEN_LEN,packet);
+
+	return plen;
 }
 const u_char* polv_arp_oper(const u_char* packet)
 {
-	return NULL;
+	const u_char* oper;
+	oper = polv_oct(OPER,OPER_LEN,packet);
+	
+	return oper;
 }
 const u_char* polv_arp_sha(const u_char* packet)
 {
-	return NULL;
+	const u_char* sha;
+	sha = polv_oct(SHA,SHA_LEN,packet);
+
+	return sha;
 }
 const u_char* polv_arp_spa(const u_char* packet)
 {
-	return NULL;
+	const u_char* spa;
+	spa = polv_oct(SPA,SPA_LEN,packet);
+
+	return spa;
 }
 const u_char* polv_arp_tha(const u_char* packet)
 {
-	return NULL;
+	const u_char* tha;
+	tha = polv_oct(THA,THA_LEN,packet);
+	
+	return tha;
 }
 const u_char* polv_arp_tpa(const u_char* packet)
 {
+	const u_char* tpa;
+	tpa = polv_oct(TPA,TPA_LEN,packet);
+
+	return tpa;
 }

@@ -6,6 +6,10 @@
 #include <cstdlib>
 #include <iostream>
 
+u_char arp[2] = {8,6};
+u_char ipv4[2] = {8,0};
+u_char ipv6[2] = {134, 221};
+
 using namespace std;
 
 struct polv_network* polv_network_init()
@@ -36,4 +40,16 @@ void polv_network_destroy(struct polv_network* network)
 		polv_arp_destroy((struct polv_arp*) network->header);
 	}
 	free(network);
+}
+
+enum polv_net_protocol polv_network_protocol(const u_char* ethertype)
+{
+	if (arp == ethertype) 
+		return ARP;
+	if (ipv4 == ethertype)
+		return IPV4;
+	if (ipv6 == ethertype)
+		return IPV6;
+	else
+		exit(EXIT_FAILURE);
 }

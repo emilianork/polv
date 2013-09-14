@@ -1,5 +1,23 @@
 #include "tools/polv_types.h"
 
+#define VERSION_V6 0
+#define TRAFFIC_CLASS 0 
+#define FLOW_LABEL 1
+#define PAYLOAD_LEN 4
+#define NEXT_HEADER 6
+#define HOP_LIMIT 7
+#define SRC_ADDR_V6 8
+#define DST_ADDR_V6 24
+
+#define VERSION_V6_LEN 1
+#define TRAFFIC_CLASS_LEN 2
+#define FLOW_LABEL_LEN 3
+#define PAYLOAD_LEN_LEN 2
+#define NEXT_HEADER_LEN 1
+#define HOP_LIMIT_LEN 1
+#define SRC_ADDR_V6_LEN 16
+#define DST_ADDR_V6_LEN 16
+
 struct polv_ip_v6 {
 	const u_char* version;
 	const u_char* traffic_class;
@@ -13,3 +31,12 @@ struct polv_ip_v6 {
 
 struct polv_ip_v6* polv_ip_v6_init();
 void polv_ip_v6_destroy(struct polv_ip_v6*);
+
+const u_char* polv_ip_v6_version(const u_char*);
+const u_char* polv_ip_v6_traffic_class(const u_char*);
+const u_char* polv_ip_v6_flow_label(const u_char*);
+const u_char* polv_ip_v6_payload_len(const u_char*);
+const u_char* polv_ip_v6_next_header(const u_char*);
+const u_char* polv_ip_v6_hop_limit(const u_char*);
+const u_char* polv_ip_v6_src_addr(const u_char*);
+const u_char* polv_ip_v6_dst_addr(const u_char*);

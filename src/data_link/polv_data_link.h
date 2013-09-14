@@ -26,13 +26,13 @@ enum polv_ethertype {
 };
 
 struct polv_data_link {
-	const u_char *dst;
-	const u_char *src;
+	const hexadecimal *dst;
+	const hexadecimal *src;
 	enum polv_ethertype type;
-	const u_char *ethertype;
-	const u_char *dsap;
-	const u_char *ssap;
-	const u_char* control;
+	const hexadecimal *ethertype;
+	const hexadecimal *dsap;
+	const hexadecimal *ssap;
+	const hexadecimal *control;
 };
 
 /* Funciones para inicializar y destruir struct 
@@ -43,14 +43,14 @@ void polv_data_link_destroy(struct polv_data_link*);
 /* Funciones para obtener los datos del encabezado MAC*/
 /* @param  El paquete capturado con libpcap */
 
-const u_char* polv_ether_dst(const u_char*);
-const u_char* polv_ether_src(const u_char*);
+const hexadecimal* polv_ether_dst(const u_char*);
+const hexadecimal* polv_ether_src(const u_char*);
 enum polv_ethertype polv_ether_ver(const u_char*);
-const u_char* polv_ethertype(const u_char*, enum polv_ethertype);
-const u_char* polv_dsap(const u_char*);
-const u_char* polv_ssap(const u_char*);
-const u_char* polv_control(const u_char*);
-const u_char* polv_org_code(const u_char*);
-const u_char* polv_network_header(const u_char*,enum polv_ethertype, int);
+const hexadecimal* polv_ethertype(const u_char*, enum polv_ethertype);
+const hexadecimal* polv_dsap(const u_char*);
+const hexadecimal* polv_ssap(const u_char*);
+const hexadecimal* polv_control(const u_char*);
+const hexadecimal* polv_org_code(const u_char*);
+const hexadecimal* polv_network_header(const u_char*,enum polv_ethertype, int);
 
 #endif POLV_DATA_LINK_H_

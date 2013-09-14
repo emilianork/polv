@@ -17,15 +17,16 @@ struct polv_network {
 struct polv_network* polv_network_init();
 void polv_network_destroy(struct polv_network*);
 
-/* @param   El paquete que me entrega libpcap
-   @return  La cabecera de la capa de red */
-//const u_char* polv_network_head(const u_char*, );
-
 /*
   @param   Cabecera de la capa de red.
   @return  El protocolo de la capa de red utilizado.
   
  */
-//enum polv_net_protocol polv_network_protocol(const u_char*);
+enum polv_net_protocol polv_network_protocol(const u_char*);
+
+/* @param   El paquete que me entrega libpcap
+   @return  La cabecera de la capa de red */
+//const u_char* polv_network_head(const u_char*, );
+
 
 #endif POLV_DATA_LINK_H_

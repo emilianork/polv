@@ -7,6 +7,6 @@
    @param len
    @param packet
    @return El paquete completo*/
-const u_char* polv_oct(int,int,const u_char*);
+const hex* polv_oct(int,int,const u_char*);
 
 #endif POLV_TOOLS_H_

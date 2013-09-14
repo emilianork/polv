@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include <iostream>
 
+u_char etherII[2] = {6,0};
+u_char len[2] = {5,220};
+
 using namespace std;
 
 struct polv_data_link* polv_data_link_init()
@@ -59,15 +62,6 @@ enum polv_ethertype polv_ether_ver(const u_char* packet)
 
 	const u_char* type;
 	type = polv_oct(TYPE,TYPE_LEN,packet);
-
-	u_char* etherII = (u_char*) malloc(sizeof(u_char)*2);
-	u_char* len = (u_char*) malloc(sizeof(u_char)*2);
-
-	etherII[0] = 6;
-	etherII[1] = 0;
-
-	len[0] = 5;
-	len[1] = 220;
 
 	if (type > etherII) {
 		return V802;

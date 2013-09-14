@@ -2,9 +2,11 @@
 
 #include <iostream>
 
-const u_char* polv_oct(int from, int len, const u_char* packet) 
+const hexadecimal* polv_oct(int from, int len, const u_char* packet) 
 {
+	hexadecimal* hex;
 	u_char* octs;
+	
 	octs = (u_char*) malloc(sizeof(u_char));
 
 	int i;
@@ -13,5 +15,9 @@ const u_char* polv_oct(int from, int len, const u_char* packet)
 		octs[i] = packet[from + i];
 	}
 
-	return ((const u_char*)octs);
+	hex = (hexadecimal*) malloc(sizeof(hexadecimal));
+
+	hex->octs = (const u_char*) octs;
+	hex->len = len;
+	return ((const hexadecimal) hex);
 }
