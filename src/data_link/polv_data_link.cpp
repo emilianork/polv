@@ -134,7 +134,7 @@ const u_char* polv_org_code(const u_char* packet)
 	return org_code;
 }
 
-struct polv_next_layer* polv_network_header(const u_char* packet, 
+struct polv_next_layer* polv_network_packet(const u_char* packet, 
 								  enum polv_ethertype etherver, int len)
 {
 	const u_char* header;

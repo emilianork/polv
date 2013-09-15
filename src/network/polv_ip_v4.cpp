@@ -165,3 +165,21 @@ const u_char* polv_ip_v4_options(const u_char* packet, u_char ihl)
 	}
 }
 
+struct polv_next_layer* polv_ip_v4_next_layer(const u_char* packet, int len)
+{
+	const u_char* ihl;
+	ihl = polv_ip_v4_ihl(packet);
+	
+	int header_len = ihl[0] * 4;
+	
+	const u_char* transport;
+	transport = polv_oct(header_len,len - header_len,packet);
+
+	struct polv_next_layer* next_layer;
+	next_layer = polv_next_layer_init();
+
+	next_layer->packet = transport;
+	next_layer->len = len - header_len;
+
+	return next_layer;
+}

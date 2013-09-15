@@ -56,7 +56,7 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 {
 	int i;
 	struct polv_data_link* data_link;
-	data_link = polv_data_link_layer_init(packet, header->len);
+	data_link = polv_data_link_layer_init(packet);
 
 	printf("Paquete en bruto:\n");
 	print_packet(packet,header->len);
@@ -68,7 +68,7 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 	printf("\n\tPaquete capa de enlace: ");
 
 	struct polv_next_layer* next_layer;
-	next_layer = polv_network_header(packet,data_link->type,header->len);
+	next_layer = polv_network_packet(packet,data_link->type,header->len);
 
 	print_packet(next_layer->packet,next_layer->len);
 		

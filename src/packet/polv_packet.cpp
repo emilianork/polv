@@ -42,7 +42,7 @@ void polv_packet_destroy(struct polv_packet* packet)
 	free(packet);
 }
 
-struct polv_data_link* polv_data_link_layer_init(const u_char* packet, int len)
+struct polv_data_link* polv_data_link_layer_init(const u_char* packet)
 {
 	enum polv_ethertype type;
 	
@@ -69,5 +69,32 @@ struct polv_data_link* polv_data_link_layer_init(const u_char* packet, int len)
 		data_link->org_code = polv_org_code(packet);
 		
 		return data_link;
+	}
+}
+
+struct polv_network* polv_network_layer_init(const u_char* packet,
+											 const u_char* ethertype, int len)
+{
+	enum polv_net_protocol protocol;
+	protocol = polv_network_protocol(ethertype);
+
+	if (protocol == UNKNOWN_NET)
+		return NULL;
+
+	struct polv_network* network;
+	network = polv_network_init();
+	
+	network->protocol = protocol;
+	
+	switch(protocol) {
+	case ARP:
+		network->header = polv_arp_analyze(packet);
+		return network;
+	case IPV4:
+		network->header = polv_ip_v4_analyze(packet);
+		return network;
+	case IPV6:
+		network->header = polv_ip_v6_analyze(packet);
+		return network;
 	}
 }

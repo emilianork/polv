@@ -1,5 +1,7 @@
 #include "tools/polv_types.h"
 
+#include "tools/polv_next_layer.h"
+
 #define VERSION 0
 #define IHL 0
 #define TYPE_SERVICE 1
@@ -60,4 +62,6 @@ const u_char* polv_ip_v4_protocol(const u_char*);
 const u_char* polv_ip_v4_header_check(const u_char*);
 const u_char* polv_ip_v4_src_addr(const u_char*);
 const u_char* polv_ip_v4_dst_addr(const u_char*);
-const u_char* polv_ip_v4_options(const u_char*);
+const u_char* polv_ip_v4_options(const u_char*, u_char ihl);
+
+struct polv_next_layer* polv_ip_v4_next_layer(const u_char*,int);

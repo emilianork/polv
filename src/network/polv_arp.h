@@ -1,5 +1,7 @@
 #include "tools/polv_types.h"
 
+#include "tools/polv_next_layer.h"
+
 #define HTYPE 0
 #define PTYPE 2
 #define HLEN 4
@@ -19,6 +21,8 @@
 #define SPA_LEN 4
 #define THA_LEN 6
 #define TPA_LEN 4
+
+#define ARP_HEADER_LEN 28
 
 struct polv_arp {
 	const u_char* htype;
@@ -45,3 +49,5 @@ const u_char* polv_arp_sha(const u_char*);
 const u_char* polv_arp_spa(const u_char*);
 const u_char* polv_arp_tha(const u_char*);
 const u_char* polv_arp_tpa(const u_char*);
+
+struct polv_next_layer* polv_arp_next_layer(const u_char*,int);

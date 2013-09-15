@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 
-struct polv_arp* pol_arp_init()
+struct polv_arp* polv_arp_init()
 {
 	struct polv_arp* arp;
 
@@ -97,4 +97,18 @@ const u_char* polv_arp_tpa(const u_char* packet)
 	tpa = polv_oct(TPA,TPA_LEN,packet);
 
 	return tpa;
+}
+
+struct polv_next_layer* polv_arp_next_layer(const u_char* packet, int len)
+{
+	const u_char* transport;
+	transport = polv_oct(ARP_HEADER_LEN, len - ARP_HEADER_LEN, packet);
+	
+	struct polv_next_layer* next_layer;
+	next_layer = polv_next_layer_init();
+
+	next_layer->packet = transport;
+	next_layer->len = len - ARP_HEADER_LEN;
+	
+	return next_layer;
 }

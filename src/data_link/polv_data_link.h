@@ -54,6 +54,6 @@ const u_char* polv_dsap(const u_char*);
 const u_char* polv_ssap(const u_char*);
 const u_char* polv_control(const u_char*);
 const u_char* polv_org_code(const u_char*);
-struct polv_next_layer* polv_network_header(const u_char*,enum polv_ethertype, int);
+struct polv_next_layer* polv_network_packet(const u_char*,enum polv_ethertype, int);
 
 #endif POLV_DATA_LINK_H_
