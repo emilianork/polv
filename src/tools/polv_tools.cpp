@@ -7,7 +7,7 @@ const u_char* polv_oct(int from, int len, const u_char* packet)
 {
 	u_char* octs;
 	
-	octs = (u_char*) malloc(sizeof(u_char));
+	octs = (u_char*) malloc(sizeof(u_char)*len);
 
 	int i;
 

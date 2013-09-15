@@ -73,7 +73,7 @@ struct polv_data_link* polv_data_link_layer_init(const u_char* packet)
 }
 
 struct polv_network* polv_network_layer_init(const u_char* packet,
-											 const u_char* ethertype, int len)
+											 const u_char* ethertype)
 {
 	enum polv_net_protocol protocol;
 	protocol = polv_network_protocol(ethertype);
@@ -88,13 +88,13 @@ struct polv_network* polv_network_layer_init(const u_char* packet,
 	
 	switch(protocol) {
 	case ARP:
-		network->header = polv_arp_analyze(packet);
+		network->header = (void *)polv_arp_analyze(packet);
 		return network;
 	case IPV4:
-		network->header = polv_ip_v4_analyze(packet);
+		network->header = (void *)polv_ip_v4_analyze(packet);
 		return network;
 	case IPV6:
-		network->header = polv_ip_v6_analyze(packet);
+		network->header = (void *)polv_ip_v6_analyze(packet);
 		return network;
 	}
 }

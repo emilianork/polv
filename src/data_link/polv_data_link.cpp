@@ -148,6 +148,9 @@ struct polv_next_layer* polv_network_packet(const u_char* packet,
 		header = polv_oct(DATA,len - DATA,packet);
 		next_layer_len = len - DATA;
 		break;
+	case UNKNOWN_LINK:
+		return NULL;
+		break;
 	}
 
 	struct polv_next_layer* next_layer;

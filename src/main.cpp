@@ -2,6 +2,10 @@
 #include "tools/polv_tools.h"
 
 #include "data_link/polv_data_link.h"
+#include "network/polv_network.h"
+#include "network/polv_ip_v4.h"
+#include "network/polv_ip_v6.h"
+#include "network/polv_arp.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -17,6 +21,10 @@ void callback (u_char*, const struct pcap_pkthdr*, const u_char*);
 void print_data_link(struct polv_data_link*);
 void print_packet(const u_char*, int);
 void print_octs(const u_char*, int);
+void print_network(struct polv_network*);
+void print_ipv4(struct polv_ip_v4*);
+void print_ipv6(struct polv_ip_v6*);
+void print_arp(struct polv_arp*);
 
 #define MAC_ADDRESS_LEN 6
 
@@ -31,7 +39,7 @@ int main(int argc, char *argv[])
 	const u_char *packet;
 	struct pcap_pkthdr hdr;
 
-	int count = 1;
+	int count = 1000;
 	
 	dev = argv[1];
 	
@@ -63,13 +71,22 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 	
 	print_data_link(data_link);
 
-
-		
-	printf("\n\tPaquete capa de enlace: ");
-
 	struct polv_next_layer* next_layer;
 	next_layer = polv_network_packet(packet,data_link->type,header->len);
 
+	printf("\n\tPaquete en la capa de red: ");
+	print_packet(next_layer->packet,next_layer->len);
+	struct polv_network* network;
+
+	network = polv_network_layer_init(next_layer->packet,
+									  data_link->ethertype);
+
+   
+	print_network(network);
+	printf("\n\tPaquete capa de transporte: ");
+	next_layer = polv_transport_packet(next_layer->packet,network->protocol,
+									   next_layer->len);
+  	
 	print_packet(next_layer->packet,next_layer->len);
 		
 	return;
@@ -111,10 +128,10 @@ void print_data_link(struct polv_data_link* data_link)
 	
 	switch (data_link->type) {
 	case V802:
-		printf("Ether Version: %s", "V802   ");
+		printf("\nEther Version: %s", "V802   ");
 		break;
 	case VII:
-			printf("Ether Version: %s", "VII   ");
+			printf("\nEther Version: %s", "VII   ");
 	}
 
 	printf("Mac Destino: ");
@@ -143,4 +160,133 @@ void print_data_link(struct polv_data_link* data_link)
 	
 	return;
 		
+}
+
+void print_network(struct polv_network* network)
+{
+	switch(network->protocol) {
+	case IPV4:
+		print_ipv4((struct polv_ip_v4*)network->header);
+		break;
+	case IPV6:
+		print_ipv6((struct polv_ip_v6*)network->header);
+		exit(0);
+		break;
+	case ARP:
+		print_arp((struct polv_arp*)network->header);
+		break;
+	}
+	return;
+}
+
+void print_ipv4(struct polv_ip_v4* ip)
+{
+	printf("\n\n\tIP4:\n");
+	
+	printf("Version: ");
+	print_octs(ip->version,VERSION_LEN);
+	
+	printf("Ihl: ");
+	print_octs(ip->ihl,IHL_LEN);
+
+	printf("Type of service: ");
+	print_octs(ip->type_service, TYPE_SERVICE);
+	
+	printf("Len: ");
+	print_octs(ip->len,LEN_LEN);
+
+	printf("Identification: ");
+	print_octs(ip->identification,IDENTIFICATION_LEN);
+
+	printf("Flags: ");
+	print_octs(ip->flags, FLAGS_LEN);
+
+	printf("Fragment Offset: ");
+	print_octs(ip->fragment_offset,FRAGMENT_OFFSET_LEN);
+
+	printf("Time to live: ");
+	print_octs(ip->time_to_live,TIME_TO_LIVE_LEN);
+	
+	printf("Protocol: ");
+	print_octs(ip->protocol,PROTOCOL_LEN);
+
+	printf("Header Check: ");
+	print_octs(ip->header_check,HEADER_CHECK_LEN);
+
+	printf("SRC ADDR: ");
+	print_octs(ip->src_addr, SRC_ADDR_LEN);
+	
+	printf("DST ADDR: ");
+	print_octs(ip->dst_addr, DST_ADDR_LEN);
+
+	if (ip->ihl[0] > 5) {
+		printf("OPTIONS: ");
+		print_octs(ip->options,(ip->ihl[0] - 5) * 4);
+	}
+	printf("\n");
+}
+
+void print_ipv6(struct polv_ip_v6* ip) 
+{
+	printf("\n\n\tIP6:\n");
+
+	printf("Version: ");
+	print_octs(ip->version,VERSION_V6_LEN);
+
+	printf("Traffic Class: ");
+	print_octs(ip->traffic_class,TRAFFIC_CLASS_LEN);
+
+	printf("Flow Label: ");
+	print_octs(ip->flow_label,FLOW_LABEL_LEN);
+	
+	printf("Payload_len: ");
+	print_octs(ip->payload_len,PAYLOAD_LEN_LEN);
+	
+	printf("Next header: ");
+	print_octs(ip->next_header,NEXT_HEADER_LEN);
+
+	printf("Hop Limit: ");
+	print_octs(ip->hop_limit,HOP_LIMIT_LEN);
+
+	printf("Src Addr: ");
+	print_octs(ip->src_addr, SRC_ADDR_V6_LEN);
+
+	printf("Dst Addr: ");
+	print_octs(ip->dst_addr, DST_ADDR_V6_LEN);
+
+	printf("\n");
+}
+
+void print_arp(struct polv_arp* arp)
+{
+	printf("\n\n\tARP:\n");
+	
+	printf("HTYPE: ");
+	print_octs(arp->htype, HTYPE_LEN);
+
+	printf("PTYPE: ");
+	print_octs(arp->ptype, PTYPE_LEN);
+
+	printf("HLEN: ");
+	print_octs(arp->hlen,HLEN_LEN);
+	
+	printf("PLEN: ");
+	print_octs(arp->plen,PLEN_LEN);
+
+	printf("OPER: ");
+	print_octs(arp->oper,OPER_LEN);
+	
+	printf("SHA: ");
+	print_octs(arp->sha,SHA_LEN);
+	
+	printf("SPA: ");
+	print_octs(arp->spa,SPA_LEN);
+
+	printf("THA: ");
+	print_octs(arp->tha,THA_LEN);
+
+	printf("TPA: ");
+	print_octs(arp->tpa,TPA_LEN);
+
+	printf("\n");
 }
