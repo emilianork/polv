@@ -10,14 +10,6 @@ enum polv_trans_protocol {
 	UNKNOWN_TRANS
 };
 
-struct udp {
-	const u_char* src_port;
-	const u_char* dst_port;
-	const u_char* len;
-	const u_char* checksum;
-};
-
-
 struct tcp {
 	const u_char* src_port;
 	const u_char* dst_port;
