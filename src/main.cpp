@@ -234,7 +234,7 @@ void print_ipv6(struct polv_ip_v6* ip)
 	print_octs(ip->version,VERSION_V6_LEN);
 
 	printf("Traffic Class: ");
-	print_octs(ip->traffic_class,TRAFFIC_CLASS_LEN);
+	print_octs(ip->traffic_class,TRAFFIC_CLASS_LEN - 1);
 
 	printf("Flow Label: ");
 	print_octs(ip->flow_label,FLOW_LABEL_LEN);
