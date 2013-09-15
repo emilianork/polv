@@ -6,7 +6,8 @@
 enum polv_net_protocol {
 	IPV4,
 	IPV6,
-	ARP
+	ARP,
+	UNKNOWN_NET
 };
 
 struct polv_network {

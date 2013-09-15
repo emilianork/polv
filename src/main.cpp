@@ -14,6 +14,9 @@
 using namespace std;
 
 void callback (u_char*, const struct pcap_pkthdr*, const u_char*);
+void print_data_link(struct polv_data_link*);
+void print_packet(const u_char*, int);
+void print_octs(const u_char*, int);
 
 #define MAC_ADDRESS_LEN 6
 
@@ -28,7 +31,7 @@ int main(int argc, char *argv[])
 	const u_char *packet;
 	struct pcap_pkthdr hdr;
 
-	int count = 1000;
+	int count = 1;
 	
 	dev = argv[1];
 	
@@ -52,52 +55,92 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 			  const u_char* packet)
 {
 	int i;
-	const u_char *src, *dst, *ethertype;
-	enum polv_ethertype type;
-	int len = header->len - 14;
-	const u_char* header_network;
+	struct polv_data_link* data_link;
+	data_link = polv_data_link_layer_init(packet, header->len);
 
-	dst = polv_ether_dst(packet);
-	src = polv_ether_src(packet);
-	type = polv_ether_ver(packet);
-	ethertype = polv_ethertype(packet,type); 
+	printf("Paquete en bruto:\n");
+	print_packet(packet,header->len);
 	
-	header_network = polv_network_header(packet,type,len);
+	print_data_link(data_link);
 
-	enum polv_net_protocol arp = polv_network_protocol(ethertype);
 
-	if (arp == IPV4) {
-		printf("IPV4\n");
-	}
-	
-	if (arp == IPV6) {
-		printf("IPV6\n");
 		
-		printf("Paquete:   ");
-		for(i = 0; i < header->len; i++) {
-			if (i + 1 != header->len)
-				printf("%02x:",packet[i]);
-			else
-				printf("%02x\n",packet[i]);
-		}
-		exit(0);
-	}
-	
-	if (arp == ARP) {
-		printf("ARP\n");
-		
-		printf("Paquete:   ");
-		for(i = 0; i < header->len; i++) {
-			if (i + 1 != header->len)
-				printf("%02x:",packet[i]);
-			else
-				printf("%02x\n",packet[i]);
-		}
-	}
+	printf("\n\tPaquete capa de enlace: ");
 
-	printf("\n");
-	
-	
+	struct polv_next_layer* next_layer;
+	next_layer = polv_network_header(packet,data_link->type,header->len);
+
+	print_packet(next_layer->packet,next_layer->len);
+		
+	return;
+}
+
+
+void print_packet(const u_char* packet, int len)
+{
+	int i;
+	for(i = 0; i < len; i++) {
+		if (i + 1 != len)
+			printf("%02x:",packet[i]);
+		else
+			printf("%02x\n",packet[i]);
+	}
 
 	return;
+}
+
+void print_octs(const u_char* octs, int len)
+{
+	int i;
+	for(i = 0; i < len; i++) {
+		if (i + 1 != len)
+			printf("%02x:",octs[i]);
+		else
+			printf("%02x      ",octs[i]);
+	}
+
+	return;
+}
+
+void print_data_link(struct polv_data_link* data_link)
+{
+	if (data_link == NULL) {
+		printf("PROTOCOLO DE ETHERNET NO RECONOCIDO\n");
+		return;
+	}
+	
+	switch (data_link->type) {
+	case V802:
+		printf("Ether Version: %s", "V802   ");
+		break;
+	case VII:
+			printf("Ether Version: %s", "VII   ");
+	}
+
+	printf("Mac Destino: ");
+	print_octs(data_link->dst,MAC_ADDRESS);
+
+	printf("Mac Fuente: ");
+	print_octs(data_link->src,MAC_ADDRESS);
+
+	printf("Longitud/Tipo: ");
+	print_octs(data_link->ethertype,TYPE_LEN);
+	
+	if (data_link->type == VII)
+		return;
+	
+	printf("DSAP: ");
+	print_octs(data_link->dsap, DSAP_LEN);
+	
+	printf("SSAP: ");
+	print_octs(data_link->ssap, SSAP_LEN);
+
+	printf("CONTROL: ");
+	print_octs(data_link->control, CONTROL_LEN);
+
+	printf("ORG_CODE: ");
+	print_octs(data_link->org_code, ORG_CODE);
+	
+	return;
+		
 }

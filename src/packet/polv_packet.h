@@ -17,4 +17,6 @@ struct polv_packet {
 struct polv_packet* polv_packet_init();
 void polv_packet_destroy(struct polv_packet*);
 
+struct polv_data_link* polv_data_link_layer_init(const u_char*, int);
+
 #endif POLV_PACKET_H_

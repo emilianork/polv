@@ -57,5 +57,5 @@ enum polv_net_protocol polv_network_protocol(const u_char* ethertype)
 		return IPV6;
 	//std::count << "Protocolo de red, no soportado" << std::endl;
 	
-	return IPV6;
+	return UNKNOWN_NET;
 }

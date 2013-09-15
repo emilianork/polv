@@ -6,7 +6,8 @@
 enum polv_trans_protocol {
 	TCP,
 	UDP,
-	ICMP
+	ICMP,
+	UNKNOWN_TRANS
 };
 
 struct udp {
@@ -44,6 +45,7 @@ struct icmp {
 struct polv_transport {
 	enum polv_trans_protocol protocol;
 	void* header;
+	u_char* message;
 };
 
 struct polv_transport* polv_transport_init();

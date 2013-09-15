@@ -21,7 +21,8 @@ struct polv_data_link* polv_data_link_init()
 	}
 	
 	data_link->dst = data_link->src =  data_link->ethertype = 
-		data_link->dsap = data_link->ssap = data_link->control = NULL;
+		data_link->dsap = data_link->ssap = data_link->control =
+		data_link->org_code = NULL;
 
 	return data_link;
 }
@@ -29,12 +30,20 @@ struct polv_data_link* polv_data_link_init()
 
 void polv_data_link_destroy(struct polv_data_link* data_link)
 {
-	free((u_char*)data_link->dst);
-	free((u_char*)data_link->src);
-	free((u_char*)data_link->ethertype);
-	free((u_char*)data_link->dsap);
-	free((u_char*)data_link->ssap);
-	free((u_char*)data_link->control);
+	if (data_link->dst != NULL)
+		free((u_char*)data_link->dst);
+	if (data_link->src != NULL)
+		free((u_char*)data_link->src);
+	if (data_link->ethertype != NULL)
+		free((u_char*)data_link->ethertype);
+	if (data_link->dsap != NULL)
+		free((u_char*)data_link->dsap);
+	if (data_link->ssap != NULL)
+		free((u_char*)data_link->ssap);
+	if (data_link->control != NULL)
+		free((u_char*)data_link->control);
+	if (data_link->org_code != NULL)
+		free((u_char*)data_link->org_code);
 	
 	free(data_link);
 
@@ -68,8 +77,8 @@ enum polv_ethertype polv_ether_ver(const u_char* packet)
 		if (polv_compare(type,len,TYPE_LEN) == -1) {
 			return V802;
 		} else {
-			cout << "\nProtocolo de capa de enlace, desconocido." << endl;
-			exit(EXIT_FAILURE);
+			/* Protocolo de capa de enlace, desconocido. */
+			return UNKNOWN_LINK;
 		}
 	}
 }
@@ -85,6 +94,8 @@ const u_char* polv_ethertype(const u_char* packet, enum polv_ethertype etherver)
 	case V802:
 		ethertype = polv_oct(ETHERTYPE,TYPE_LEN,packet);
 		break;
+	case UNKNOWN_LINK:
+		ethertype = NULL;
 	}
 
 	return ethertype;
@@ -123,18 +134,27 @@ const u_char* polv_org_code(const u_char* packet)
 	return org_code;
 }
 
-const u_char* polv_network_header(const u_char* packet, 
+struct polv_next_layer* polv_network_header(const u_char* packet, 
 								  enum polv_ethertype etherver, int len)
 {
 	const u_char* header;
+	int next_layer_len;
 	switch (etherver) {
 	case VII:
-	    header = polv_oct(DSAP,len,packet);
+	    header = polv_oct(DSAP,len - DSAP,packet);
+		next_layer_len = len - DSAP;
 		break;
 	case V802:
-		header = polv_oct(DATA,len,packet);
+		header = polv_oct(DATA,len - DATA,packet);
+		next_layer_len = len - DATA;
 		break;
 	}
 
-	return header;
+	struct polv_next_layer* next_layer;
+	next_layer = polv_next_layer_init();
+
+	next_layer->packet = header;
+	next_layer->len = next_layer_len;
+	
+	return next_layer;
 }

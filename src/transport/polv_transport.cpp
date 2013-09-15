@@ -16,7 +16,7 @@ struct polv_transport* polv_transport_init()
 		exit(EXIT_FAILURE);
 	}
 
-	transport->header = NULL;
+	transport->header = transport->message = NULL;
 
 	return transport;
 }
