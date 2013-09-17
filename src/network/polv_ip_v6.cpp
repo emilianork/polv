@@ -51,7 +51,7 @@ const u_char* polv_ip_v6_traffic_class(const u_char* packet)
 	u_char 	mask = 240;
 	u_char traffic;
 
-	traffic_class = (u_char*) polv_oct(TRAFFIC_CLASS,TRAFFIC_CLASS_LEN,packet);
+	traffic_class = (u_char*) polv_oct(TRAFFIC_CLASS,TRAFFIC_CLASS_LEN + 1,packet);
 	traffic_class[0] = traffic_class[0] << 4;
 	traffic_class[0] = traffic_class[0] & mask;
 

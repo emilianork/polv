@@ -28,6 +28,7 @@ void print_arp(struct polv_arp*);
 
 #define MAC_ADDRESS_LEN 6
 
+int num = 0;
 
 int main(int argc, char *argv[])
 {
@@ -56,39 +57,17 @@ int main(int argc, char *argv[])
 	
 	pcap_close(capture);
 	
+	printf("\n");
 	return EXIT_SUCCESS;
 }
 
 void callback(u_char *user, const struct pcap_pkthdr* header,
 			  const u_char* packet)
 {
-	int i;
-	struct polv_data_link* data_link;
-	data_link = polv_data_link_layer_init(packet);
-
-	printf("Paquete en bruto:\n");
-	print_packet(packet,header->len);
+	struct polv_packet* p;
+	p = polv_packet_create(packet,header->len);
+	printf("%d\n", num++);
 	
-	print_data_link(data_link);
-
-	struct polv_next_layer* next_layer;
-	next_layer = polv_network_packet(packet,data_link->type,header->len);
-
-	printf("\n\tPaquete en la capa de red: ");
-	print_packet(next_layer->packet,next_layer->len);
-	struct polv_network* network;
-
-	network = polv_network_layer_init(next_layer->packet,
-									  data_link->ethertype);
-
-   
-	print_network(network);
-	printf("\n\tPaquete capa de transporte: ");
-	next_layer = polv_transport_packet(next_layer->packet,network->protocol,
-									   next_layer->len);
-  	
-	print_packet(next_layer->packet,next_layer->len);
-		
 	return;
 }
 
@@ -234,7 +213,7 @@ void print_ipv6(struct polv_ip_v6* ip)
 	print_octs(ip->version,VERSION_V6_LEN);
 
 	printf("Traffic Class: ");
-	print_octs(ip->traffic_class,TRAFFIC_CLASS_LEN - 1);
+	print_octs(ip->traffic_class,TRAFFIC_CLASS_LEN);
 
 	printf("Flow Label: ");
 	print_octs(ip->flow_label,FLOW_LABEL_LEN);

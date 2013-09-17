@@ -1,12 +1,26 @@
 #include "packet/polv_packet.h"
 
+#include "tools/polv_tools.h"
 #include "tools/polv_next_layer.h"
 #include "tools/polv_types.h"
+
+#include "network/polv_arp.h"
+#include "network/polv_ip_v4.h"
+#include "network/polv_ip_v6.h"
 
 #include <cstdlib>
 #include <iostream>
 
 using namespace std;
+
+struct polv_packet* polv_packet_init();
+
+struct polv_data_link* polv_data_link_layer_init(const u_char*);
+
+struct polv_network* polv_network_layer_init(const u_char*, const u_char*);
+
+struct polv_transport* polv_transport_layer_init(const u_char*,
+												 const u_char*);
 
 struct polv_packet* polv_packet_init()
 {
@@ -22,15 +36,11 @@ struct polv_packet* polv_packet_init()
 		cout << "\nNo se encontro memoria disponible." << endl;
 		exit(EXIT_FAILURE);
 	}
-		
 
-	data_link = polv_data_link_init();
-	network = polv_network_init();
-	transport = polv_transport_init();
-
-	packet->data_link = data_link;
-	packet->network = network;
-	packet->transport = transport;
+	packet->data_link = NULL;
+	packet->network = NULL;
+	packet->transport = NULL;
+	packet->raw_packet = NULL;
 	
 	return packet;
 }
@@ -39,7 +49,77 @@ void polv_packet_destroy(struct polv_packet* packet)
 {
 	polv_data_link_destroy(packet->data_link);
 	polv_network_destroy(packet->network);
+	polv_transport_destroy(packet->transport);
+	
+	free((u_char*)packet->raw_packet);
 	free(packet);
+}
+
+struct polv_packet* polv_packet_create(const u_char* raw_packet, int len)
+{
+	struct polv_packet* packet;
+	struct polv_data_link* data_link;
+	struct polv_network* network;
+	struct polv_transport* transport;
+
+	packet = polv_packet_init();
+	packet->raw_packet = polv_oct(0,len,raw_packet);
+	packet->raw_packet_len = len;
+
+	data_link = polv_data_link_layer_init(raw_packet);
+	packet->data_link = data_link;
+	
+	if (data_link == NULL)
+		return packet;
+	
+	struct polv_next_layer* next_layer;
+	next_layer = polv_network_packet(raw_packet,data_link->type,len);
+	
+	network = polv_network_layer_init(next_layer->packet,data_link->ethertype);
+	if (network == NULL)
+		return packet;
+
+	packet->network = network;
+	
+	if (network->protocol == ARP) {
+		next_layer = polv_transport_packet(next_layer->packet,ARP,next_layer->len);
+		
+		struct polv_arp* arp;
+		arp = (struct polv_arp*) network->header;
+		
+		network = polv_network_layer_init(next_layer->packet, arp->ptype);
+		
+		arp->network_layer = network;
+	}
+	
+	next_layer = polv_transport_packet(next_layer->packet,
+									   network->protocol,next_layer->len);
+
+
+	switch(network->protocol) {
+	case IPV4:
+		struct polv_ip_v4* ip_v4;
+		ip_v4 = (struct polv_ip_v4*)network->header;
+		transport = polv_transport_layer_init(next_layer->packet,ip_v4->protocol);
+		break;
+	case IPV6:
+		struct polv_ip_v6* ip_v6;
+		ip_v6 = (struct polv_ip_v6*)network->header;
+		transport = polv_transport_layer_init(next_layer->packet,
+											  ip_v6->next_header);
+		break;
+	}
+
+	packet->transport = transport;
+	
+	next_layer = polv_transport_data(transport,
+									 next_layer->packet,
+									 next_layer->len);
+	return packet;
+	packet->raw_data = next_layer->packet;
+	packet->raw_data_len = next_layer->len;
+
+	return packet;
 }
 
 struct polv_data_link* polv_data_link_layer_init(const u_char* packet)
@@ -96,5 +176,32 @@ struct polv_network* polv_network_layer_init(const u_char* packet,
 	case IPV6:
 		network->header = (void *)polv_ip_v6_analyze(packet);
 		return network;
+	}
+}
+
+struct polv_transport* polv_transport_layer_init(const u_char* packet,
+												 const u_char* prot)
+{
+	enum polv_trans_protocol protocol;
+	protocol = polv_transport_protocol(prot);
+
+	if (protocol == UNKNOWN_TRANS)
+		return NULL;
+	
+	struct polv_transport* transport;
+	transport = polv_transport_init();
+	
+	transport->protocol = protocol;
+
+	switch(protocol) {
+	case TCP:
+		transport->header = (void *)polv_tcp_analyze(packet);
+		return transport;
+	case UDP:
+		transport->header = (void *)polv_udp_analyze(packet);
+		return transport;
+	case ICMP:
+		transport->header = (void *)polv_icmp_analyze(packet);
+		return transport;
 	}
 }

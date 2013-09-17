@@ -12,7 +12,7 @@
 #define DST_ADDR_V6 24
 
 #define VERSION_V6_LEN 1
-#define TRAFFIC_CLASS_LEN 2
+#define TRAFFIC_CLASS_LEN 1
 #define FLOW_LABEL_LEN 3
 #define PAYLOAD_LEN_LEN 2
 #define NEXT_HEADER_LEN 1

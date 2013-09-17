@@ -30,20 +30,13 @@ struct polv_data_link* polv_data_link_init()
 
 void polv_data_link_destroy(struct polv_data_link* data_link)
 {
-	if (data_link->dst != NULL)
-		free((u_char*)data_link->dst);
-	if (data_link->src != NULL)
-		free((u_char*)data_link->src);
-	if (data_link->ethertype != NULL)
-		free((u_char*)data_link->ethertype);
-	if (data_link->dsap != NULL)
-		free((u_char*)data_link->dsap);
-	if (data_link->ssap != NULL)
-		free((u_char*)data_link->ssap);
-	if (data_link->control != NULL)
-		free((u_char*)data_link->control);
-	if (data_link->org_code != NULL)
-		free((u_char*)data_link->org_code);
+	free((u_char*)data_link->dst);
+	free((u_char*)data_link->src);
+	free((u_char*)data_link->ethertype);
+	free((u_char*)data_link->dsap);
+	free((u_char*)data_link->ssap);
+	free((u_char*)data_link->control);
+	free((u_char*)data_link->org_code);
 	
 	free(data_link);
 

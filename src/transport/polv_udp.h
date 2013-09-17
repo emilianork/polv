@@ -26,9 +26,9 @@ struct polv_udp {
 struct polv_udp* polv_udp_init();
 void polv_udp_destroy(struct polv_udp*);
 
-const u_char* polv_upd_src_port(const u_char*);
+const u_char* polv_udp_src_port(const u_char*);
 const u_char* polv_udp_dst_port(const u_char*);
-const u_char* polv_upd_len(const u_char*);
+const u_char* polv_udp_len(const u_char*);
 const u_char* polv_udp_checksum(const u_char*);
 
 struct polv_next_layer* polv_udp_data(const u_char*, int);
