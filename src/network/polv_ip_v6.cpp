@@ -122,16 +122,18 @@ const u_char* polv_ip_v6_dst_addr(const u_char* packet)
 	return dst_addr;
 }
 
-struct polv_next_layer* polv_ip_v6_next_layer(const u_char* packet,int len)
+void polv_ip_v6_next_layer(struct polv_next_layer* next_layer)
 {
+	const u_char* packet = next_layer->packet;
+	int len = next_layer->len;
+	
 	const u_char* transport;
 	transport = polv_oct(IPV6_HEADER_LEN,len - IPV6_HEADER_LEN,packet);
 
-	struct polv_next_layer* next_layer;
+	free((u_char*)next_layer->packet);
 
 	next_layer->packet = transport;
 	next_layer->len = len - IPV6_HEADER_LEN;
 
-	return next_layer;
-	
+	return;
 }

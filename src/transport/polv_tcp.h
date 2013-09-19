@@ -57,6 +57,6 @@ const u_char* polv_tcp_checksum(const u_char*);
 const u_char* polv_tcp_urgent(const u_char*);
 const u_char* polv_tcp_options(const u_char*);
 
-struct polv_next_layer* polv_tcp_data(const u_char*,u_char, int);
+void polv_tcp_data(u_char,struct polv_next_layer*);
 
 #endif POLV_TCP_H_

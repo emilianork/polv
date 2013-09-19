@@ -26,10 +26,6 @@ struct polv_packet* polv_packet_init()
 {
 	struct polv_packet *packet;
 
-	struct polv_data_link* data_link;
-	struct polv_network* network;
-	struct polv_transport* transport;
-
 	packet = (struct polv_packet*) malloc(sizeof(struct polv_packet));
 
 	if (packet == NULL) {
@@ -41,16 +37,22 @@ struct polv_packet* polv_packet_init()
 	packet->network = NULL;
 	packet->transport = NULL;
 	packet->raw_packet = NULL;
+	packet->raw_data = NULL;
 	
 	return packet;
 }
 
 void polv_packet_destroy(struct polv_packet* packet)
 {
-	polv_data_link_destroy(packet->data_link);
-	polv_network_destroy(packet->network);
-	polv_transport_destroy(packet->transport);
+	if (packet->data_link != NULL)
+		polv_data_link_destroy(packet->data_link);
+	if (packet->network != NULL)
+		polv_network_destroy(packet->network);
+	if (packet->transport != NULL)
+		polv_transport_destroy(packet->transport);
 	
+	free((u_char*)packet->raw_data);
+
 	free((u_char*)packet->raw_packet);
 	free(packet);
 }
@@ -63,38 +65,38 @@ struct polv_packet* polv_packet_create(const u_char* raw_packet, int len)
 	struct polv_transport* transport;
 
 	packet = polv_packet_init();
+
 	packet->raw_packet = polv_oct(0,len,raw_packet);
 	packet->raw_packet_len = len;
 
 	data_link = polv_data_link_layer_init(raw_packet);
-	packet->data_link = data_link;
 	
+	/* El protocolo de enlace, no fue reconocido. */
 	if (data_link == NULL)
 		return packet;
 	
-	struct polv_next_layer* next_layer;
-	next_layer = polv_network_packet(raw_packet,data_link->type,len);
+	packet->data_link = data_link;
 	
-	network = polv_network_layer_init(next_layer->packet,data_link->ethertype);
+	struct polv_next_layer* next_layer;
+	next_layer = polv_next_layer_init();
+	
+	polv_network_packet(raw_packet,next_layer,data_link->type,len);
+	
+	network = polv_network_layer_init(next_layer->packet,
+									  data_link->ethertype);
+
+	packet->network = network;
+
+	/* Si no reconoce la capa de red, entonces regresa NULL*/
 	if (network == NULL)
 		return packet;
 
-	packet->network = network;
+	/* Dado que ARP es un protocolo que tiene funcionalidad hasta la capa
+	 de red, la capa de transporte ya ni importa. */
+	if (network->protocol == ARP) 
+		return packet;
 	
-	if (network->protocol == ARP) {
-		next_layer = polv_transport_packet(next_layer->packet,ARP,next_layer->len);
-		
-		struct polv_arp* arp;
-		arp = (struct polv_arp*) network->header;
-		
-		network = polv_network_layer_init(next_layer->packet, arp->ptype);
-		
-		arp->network_layer = network;
-	}
-	
-	next_layer = polv_transport_packet(next_layer->packet,
-									   network->protocol,next_layer->len);
-
+	polv_transport_packet(next_layer,network->protocol);
 
 	switch(network->protocol) {
 	case IPV4:
@@ -112,10 +114,11 @@ struct polv_packet* polv_packet_create(const u_char* raw_packet, int len)
 
 	packet->transport = transport;
 	
-	next_layer = polv_transport_data(transport,
-									 next_layer->packet,
-									 next_layer->len);
-	return packet;
+	if (transport == NULL) 
+		return packet;
+
+	polv_transport_data(transport,next_layer);
+	
 	packet->raw_data = next_layer->packet;
 	packet->raw_data_len = next_layer->len;
 

@@ -32,7 +32,6 @@ struct polv_tcp* polv_tcp_analyze(const u_char*);
 struct polv_udp* polv_udp_analyze(const u_char*);
 struct polv_icmp* polv_icmp_analyze(const u_char*);
 
-struct polv_next_layer* polv_transport_data(struct polv_transport*,
-											const u_char*, int);
+void polv_transport_data(struct polv_transport*,struct polv_next_layer*);
 
 #endif POLV_TRANSPORT_H_

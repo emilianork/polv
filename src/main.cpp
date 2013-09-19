@@ -7,6 +7,10 @@
 #include "network/polv_ip_v6.h"
 #include "network/polv_arp.h"
 
+//#include "transport/polv_udp.h"
+//#include "transport/polv_tcp.h"
+//#include "transport/polv_icmp.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -18,13 +22,17 @@
 using namespace std;
 
 void callback (u_char*, const struct pcap_pkthdr*, const u_char*);
-void print_data_link(struct polv_data_link*);
 void print_packet(const u_char*, int);
 void print_octs(const u_char*, int);
+void print_data_link(struct polv_data_link*);
 void print_network(struct polv_network*);
+void print_transport(struct polv_transport*);
 void print_ipv4(struct polv_ip_v4*);
 void print_ipv6(struct polv_ip_v6*);
 void print_arp(struct polv_arp*);
+void print_udp(struct polv_udp*);
+void print_icmp(struct polv_icmp*);
+void print_tcp(struct polv_tcp*);
 
 #define MAC_ADDRESS_LEN 6
 
@@ -40,7 +48,7 @@ int main(int argc, char *argv[])
 	const u_char *packet;
 	struct pcap_pkthdr hdr;
 
-	int count = 1000;
+	int count = 1000000;
 	
 	dev = argv[1];
 	
@@ -66,7 +74,22 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 {
 	struct polv_packet* p;
 	p = polv_packet_create(packet,header->len);
-	printf("%d\n", num++);
+	/*
+	printf("\tPACK ORIGINAL: \n");
+	print_packet(packet,header->len);
+	
+	print_data_link(p->data_link);
+	print_network(p->network);
+	print_transport(p->transport);
+	
+	if (p->raw_data != NULL) {
+		printf("\t\tDatos:\n ");
+		print_packet(p->raw_data,p->raw_data_len);
+	} else {
+		printf("No tiene data");
+	}
+	*/
+	polv_packet_destroy(p);
 	
 	return;
 }
@@ -143,13 +166,16 @@ void print_data_link(struct polv_data_link* data_link)
 
 void print_network(struct polv_network* network)
 {
+	if (network == NULL) {
+		printf("PROTOCOLO DE RED NO RECONOCIDO\n");
+		return;
+	}
 	switch(network->protocol) {
 	case IPV4:
 		print_ipv4((struct polv_ip_v4*)network->header);
 		break;
 	case IPV6:
 		print_ipv6((struct polv_ip_v6*)network->header);
-		exit(0);
 		break;
 	case ARP:
 		print_arp((struct polv_arp*)network->header);
@@ -268,4 +294,98 @@ void print_arp(struct polv_arp* arp)
 	print_octs(arp->tpa,TPA_LEN);
 
 	printf("\n");
+}
+
+void print_transport(struct polv_transport* transport)
+{
+	if (transport == NULL) {
+		printf("PROTOCOLO DE RED NO RECONOCIDO\n");
+		return;
+	}
+	
+	switch(transport->protocol) {
+	case UDP:
+		print_udp((struct polv_udp*)transport->header);
+		return;
+	case ICMP:
+		print_icmp((struct polv_icmp*)transport->header);
+		return;
+	case TCP:
+		print_tcp((struct polv_tcp*)transport->header);
+		return;
+	}
+}
+
+void print_udp(struct polv_udp* udp)
+{
+	printf("\n\n\tUDP:\n");
+	
+	printf("Source Port: ");
+	print_octs(udp->src_port,SRC_PORT_UDP_LEN);
+
+	printf("Dest Port: ");
+	print_octs(udp->dst_port,DST_PORT_UDP_LEN);
+
+	printf("Length: ");
+	print_octs(udp->len,LEN_UDP_LEN);
+
+	printf("Checksum: ");
+	print_octs(udp->checksum,CHECKSUM_UDP_LEN);
+
+	printf("\n");
+}
+
+void print_icmp(struct polv_icmp* icmp)
+{
+	printf("\n\n\tICMP:\n");
+	
+	printf("Type: ");
+	print_octs(icmp->type,TYPE_ICMP_LEN);
+
+	printf("Code: ");
+	print_octs(icmp->code,CODE_ICMP_LEN);
+
+	printf("Checksum: ");
+	print_octs(icmp->checksum,CHECKSUM_ICMP_LEN);
+
+	printf("\n");
+	
+
+}
+void print_tcp(struct polv_tcp* tcp)
+{
+	printf("\n\n\tTCP:\n");
+	
+	printf("Source Port: ");
+	print_octs(tcp->src_port,SRC_PORT_TCP_LEN);
+
+	printf("Dest Port: ");
+	print_octs(tcp->dst_port,DST_PORT_TCP_LEN);
+
+	printf("Seq: ");
+	print_octs(tcp->seq,SEQ_TCP_LEN);
+
+	printf("Ack: ");
+	print_octs(tcp->ack,ACK_TCP_LEN);
+
+	printf("Offset: ");
+	print_octs(tcp->offset,OFFSET_TCP_LEN);
+
+	printf("Reserved: ");
+	print_octs(tcp->reserved,RESERVED_TCP_LEN);
+
+	printf("Flags: ");
+	print_octs(tcp->flags,FLAGS_TCP_LEN);
+
+	printf("Window: ");
+	print_octs(tcp->window,WINDOW_TCP_LEN);
+
+	printf("Checksum: ");
+	print_octs(tcp->checksum,CHECKSUM_TCP_LEN);
+
+	printf("Urgent: ");
+	print_octs(tcp->urgent,URGENT_TCP_LEN);
+
+	printf("\n");
+
 }

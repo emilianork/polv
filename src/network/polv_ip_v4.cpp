@@ -165,8 +165,12 @@ const u_char* polv_ip_v4_options(const u_char* packet, u_char ihl)
 	}
 }
 
-struct polv_next_layer* polv_ip_v4_next_layer(const u_char* packet, int len)
+void polv_ip_v4_next_layer(struct polv_next_layer* next_layer)
 {
+
+	const u_char* packet = next_layer->packet;
+	int len = next_layer->len;
+	
 	const u_char* ihl;
 	ihl = polv_ip_v4_ihl(packet);
 	
@@ -177,11 +181,10 @@ struct polv_next_layer* polv_ip_v4_next_layer(const u_char* packet, int len)
 	const u_char* transport;
 	transport = polv_oct(header_len,len - header_len,packet);
 	
-	struct polv_next_layer* next_layer;
-	next_layer = polv_next_layer_init();
+	free((u_char*)next_layer->packet);
 
 	next_layer->packet = transport;
 	next_layer->len = len - header_len;
 
-	return next_layer;
+	return;
 }

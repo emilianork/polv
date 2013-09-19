@@ -146,19 +146,30 @@ const u_char* polv_tcp_options(const u_char* packet)
 	
 }
 
-struct polv_next_layer* polv_tcp_data(const u_char* packet,u_char offset, int len)
+void polv_tcp_data(u_char offset,struct polv_next_layer* next_layer)
 {
 	int header_len = offset * 4;
 	
-	if (header_len == len)
-		return NULL;
-	
-	struct polv_next_layer* next_layer;
-	next_layer = polv_next_layer_init();
-	
-	next_layer->packet = polv_oct(header_len, len - header_len, packet);
-	next_layer->len = len - header_len;
+	const u_char* packet;
+	int len;
+   
+	packet = next_layer->packet;
+	len = next_layer->len;
 
-	return next_layer;
+	if (header_len == len) {
+		free((u_char*)next_layer->packet);
+		next_layer->packet = NULL;
+		next_layer->len = 0;
+		return;
+	}
+
+	packet = polv_oct(header_len, len - header_len, packet);
+	len = len - header_len;
+
+	free((u_char*)next_layer->packet);
+	next_layer->packet = packet;
+	next_layer->len = len;
+
+	return;
 }
 

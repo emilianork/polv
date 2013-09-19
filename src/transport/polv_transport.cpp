@@ -7,7 +7,7 @@ using namespace std;
 
 u_char icmp = 1;
 u_char tcp = 6;
-u_char udp = 11;
+u_char udp = 17;
 u_char icmpv6 = 58;
 
 struct polv_transport* polv_transport_init()
@@ -28,7 +28,23 @@ struct polv_transport* polv_transport_init()
 
 void polv_transport_destroy(struct polv_transport* transport)
 {
-	
+	switch(transport->protocol) {
+	case TCP:
+		struct polv_tcp* tcp;
+		tcp = (struct polv_tcp*)transport->header;
+		polv_tcp_destroy(tcp);
+		break;
+	case UDP:
+		struct polv_udp* udp;
+		udp = (struct polv_udp*)transport->header;
+		polv_udp_destroy(udp);
+		break;
+	case ICMP:
+		struct polv_icmp* icmp;
+		icmp = (struct polv_icmp*)transport->header;
+		polv_icmp_destroy(icmp);
+		break;
+	}
 }
 
 enum polv_trans_protocol polv_transport_protocol(const u_char* protocol)
@@ -90,20 +106,20 @@ struct polv_icmp* polv_icmp_analyze(const u_char* packet)
 	return icmp;
 }
 
-struct polv_next_layer* polv_transport_data(struct polv_transport* transport,
-											const u_char* packet, int len)
+void polv_transport_data(struct polv_transport* transport,
+						 struct polv_next_layer* next_layer)
 {
-	if (transport == NULL)
-		return NULL;
-	
 	switch(transport->protocol) {
 	case TCP:
 		struct polv_tcp* tcp;
 		tcp = (struct polv_tcp*)transport->header;
-		return polv_tcp_data(packet,tcp->offset[0],len);
+		polv_tcp_data(tcp->offset[0],next_layer);
+		break;
 	case UDP:
-		return polv_udp_data(packet,len);
+		polv_udp_data(next_layer);
+		break;
 	case ICMP:
-		return polv_icmp_data(packet,len);
+		polv_icmp_data(next_layer);
+		break;
 	}
 }

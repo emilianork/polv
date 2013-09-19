@@ -64,4 +64,4 @@ const u_char* polv_ip_v4_src_addr(const u_char*);
 const u_char* polv_ip_v4_dst_addr(const u_char*);
 const u_char* polv_ip_v4_options(const u_char*, u_char ihl);
 
-struct polv_next_layer* polv_ip_v4_next_layer(const u_char*,int);
+void polv_ip_v4_next_layer(struct polv_next_layer*);

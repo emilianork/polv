@@ -50,19 +50,25 @@ const u_char* polv_icmp_checksum(const u_char* packet)
 	return checksum;
 }
 
-struct polv_next_layer* polv_icmp_data(const u_char* packet, int len)
+void polv_icmp_data(struct polv_next_layer* next_layer)
 {
-	if (len == DATA_ICMP)
-		return NULL;
+	const u_char* packet = next_layer->packet;
+	int len = next_layer->len;
+	
+	if (len == DATA_ICMP) {
+		free((u_char*)next_layer->packet);
+		next_layer->packet = NULL;
+		next_layer->len = 0;
+		return;
+	}
 	
 	const u_char* data;
 	data = polv_oct(DATA_ICMP,len - DATA_ICMP, packet);
-
-	struct polv_next_layer* next_layer;
-	next_layer = polv_next_layer_init();
+	
+	free((u_char*)packet);
 	
 	next_layer->packet = data;
 	next_layer->len = len - DATA_ICMP;
 
-	return next_layer;
+	return;
 }

@@ -27,7 +27,7 @@ const u_char* polv_icmp_type(const u_char*);
 const u_char* polv_icmp_code(const u_char*);
 const u_char* polv_icmp_checksum(const u_char*);
 
-struct polv_next_layer* polv_icmp_data(const u_char*, int);
+void polv_icmp_data(struct polv_next_layer*);
 
 #endif POLV_ICMP_H_
 

@@ -1,6 +1,5 @@
 #include "tools/polv_types.h"
 
-#include "tools/polv_next_layer.h"
 #include "network/polv_network.h"
 
 #define HTYPE 0
@@ -51,4 +50,3 @@ const u_char* polv_arp_spa(const u_char*);
 const u_char* polv_arp_tha(const u_char*);
 const u_char* polv_arp_tpa(const u_char*);
 
-struct polv_next_layer* polv_arp_next_layer(const u_char*,int);

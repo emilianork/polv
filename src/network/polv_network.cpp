@@ -34,14 +34,19 @@ struct polv_network* polv_network_init()
 void polv_network_destroy(struct polv_network* network)
 {
 
+	if (network != NULL)
+		return;
+
 	switch(network->protocol) {
 	case IPV4:
 		polv_ip_v4_destroy((struct polv_ip_v4*) network->header);
 		break;
 	case IPV6:
 		polv_ip_v6_destroy((struct polv_ip_v6*) network->header);
+		break;
 	case ARP:
 		polv_arp_destroy((struct polv_arp*) network->header);
+		break;
 	}
 	free(network);
 }
@@ -117,18 +122,15 @@ struct polv_ip_v6* polv_ip_v6_analyze(const u_char* packet)
 	return ip;
 }
 
-struct polv_next_layer* polv_transport_packet(const u_char* packet,
-											  enum polv_net_protocol protocol,
-											  int len)
+void polv_transport_packet(struct polv_next_layer* next_layer,
+						   enum polv_net_protocol protocol)
 {
 	switch(protocol) {
-	case UNKNOWN_NET:
-		return NULL;
-	case ARP:
-		return polv_arp_next_layer(packet,len);
 	case IPV4:
-		return polv_ip_v4_next_layer(packet,len);
+		polv_ip_v4_next_layer(next_layer);
+		break;
 	case IPV6:
-		return polv_ip_v6_next_layer(packet,len);
+		polv_ip_v6_next_layer(next_layer);
+		break;
 	}
 }

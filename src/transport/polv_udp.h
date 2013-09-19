@@ -31,5 +31,5 @@ const u_char* polv_udp_dst_port(const u_char*);
 const u_char* polv_udp_len(const u_char*);
 const u_char* polv_udp_checksum(const u_char*);
 
-struct polv_next_layer* polv_udp_data(const u_char*, int);
+void polv_udp_data(struct polv_next_layer*);
 #endif POLV_UPD_H

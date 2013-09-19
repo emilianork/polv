@@ -30,6 +30,9 @@ struct polv_data_link* polv_data_link_init()
 
 void polv_data_link_destroy(struct polv_data_link* data_link)
 {
+	if (data_link == NULL) 
+		return;
+	
 	free((u_char*)data_link->dst);
 	free((u_char*)data_link->src);
 	free((u_char*)data_link->ethertype);
@@ -127,11 +130,13 @@ const u_char* polv_org_code(const u_char* packet)
 	return org_code;
 }
 
-struct polv_next_layer* polv_network_packet(const u_char* packet, 
-								  enum polv_ethertype etherver, int len)
+void polv_network_packet(const u_char* packet,
+						 struct polv_next_layer* next_layer,
+						 enum polv_ethertype etherver, int len)
 {
 	const u_char* header;
 	int next_layer_len;
+
 	switch (etherver) {
 	case VII:
 	    header = polv_oct(DSAP,len - DSAP,packet);
@@ -141,16 +146,11 @@ struct polv_next_layer* polv_network_packet(const u_char* packet,
 		header = polv_oct(DATA,len - DATA,packet);
 		next_layer_len = len - DATA;
 		break;
-	case UNKNOWN_LINK:
-		return NULL;
-		break;
 	}
 
-	struct polv_next_layer* next_layer;
-	next_layer = polv_next_layer_init();
-
+	free((u_char*)next_layer->packet);
 	next_layer->packet = header;
 	next_layer->len = next_layer_len;
 	
-	return next_layer;
+	return;
 }

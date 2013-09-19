@@ -32,8 +32,7 @@ struct polv_ip_v6* polv_ip_v6_analyze(const u_char*);
 
 /* @param   El paquete que me entregan de la capa de enlace
    @return  El paquete de la capa de transporte */
-struct polv_next_layer* polv_transport_packet(const u_char*,
-											  enum polv_net_protocol,int len);
+void polv_transport_packet(struct polv_next_layer*,enum polv_net_protocol);
 
 
 #endif POLV_DATA_LINK_H_
