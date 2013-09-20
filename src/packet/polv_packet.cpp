@@ -91,9 +91,9 @@ struct polv_packet* polv_packet_create(const u_char* raw_packet, int len)
 	if (network == NULL)
 		return packet;
 
-	/* Dado que ARP es un protocolo que tiene funcionalidad hasta la capa
+	/* Dado que ARP y RARP es un protocolo que tiene funcionalidad hasta la capa
 	 de red, la capa de transporte ya ni importa. */
-	if (network->protocol == ARP) 
+	if ((network->protocol == ARP) || (network->protocol == RARP)) 
 		return packet;
 	
 	polv_transport_packet(next_layer,network->protocol);
@@ -171,6 +171,9 @@ struct polv_network* polv_network_layer_init(const u_char* packet,
 	
 	switch(protocol) {
 	case ARP:
+		network->header = (void *)polv_arp_analyze(packet);
+		return network;
+	case RARP:
 		network->header = (void *)polv_arp_analyze(packet);
 		return network;
 	case IPV4:

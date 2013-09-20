@@ -8,6 +8,7 @@ enum polv_net_protocol {
 	IPV4,
 	IPV6,
 	ARP,
+	RARP,
 	UNKNOWN_NET
 };
 
@@ -35,4 +36,4 @@ struct polv_ip_v6* polv_ip_v6_analyze(const u_char*);
 void polv_transport_packet(struct polv_next_layer*,enum polv_net_protocol);
 
 
-#endif POLV_DATA_LINK_H_
+#endif POLV_NETWORK_H_

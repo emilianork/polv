@@ -13,6 +13,7 @@
 const u_char arp[2] = {8,6};
 const u_char ipv4[2] = {8,0};
 const u_char ipv6[2] = {134, 221};
+const u_char rarp[2] = {128,53};
 
 using namespace std;
 
@@ -47,6 +48,9 @@ void polv_network_destroy(struct polv_network* network)
 	case ARP:
 		polv_arp_destroy((struct polv_arp*) network->header);
 		break;
+	case RARP:
+		polv_arp_destroy((struct polv_arp*) network->header);
+		break;
 	}
 	free(network);
 }
@@ -56,11 +60,12 @@ enum polv_net_protocol polv_network_protocol(const u_char* ethertype)
 	
 	if (polv_compare(arp, ethertype,TYPE_LEN) == 0) 
 		return ARP;
+	if (polv_compare(rarp, ethertype,TYPE_LEN) == 0)
+		return RARP;
 	if (polv_compare(ipv4, ethertype,TYPE_LEN) == 0)
 		return IPV4;
 	if (polv_compare(ipv6, ethertype,TYPE_LEN) == 0)
 		return IPV6;
-	//std::count << "Protocolo de red, no soportado" << std::endl;
 	
 	return UNKNOWN_NET;
 }
