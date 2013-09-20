@@ -7,9 +7,7 @@
 #include "network/polv_ip_v6.h"
 #include "network/polv_arp.h"
 
-//#include "transport/polv_udp.h"
-//#include "transport/polv_tcp.h"
-//#include "transport/polv_icmp.h"
+#include "filter/polv_filter.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -37,9 +35,13 @@ void print_tcp(struct polv_tcp*);
 #define MAC_ADDRESS_LEN 6
 
 int num = 0;
+int extern_argc;
+char** extern_argv;
 
 int main(int argc, char *argv[])
 {
+	extern_argc = argc;
+	extern_argv = argv;
 	char *dev,*dump_10,errbuf[PCAP_ERRBUF_SIZE];
 	
 	pcap_t* capture;
@@ -47,13 +49,14 @@ int main(int argc, char *argv[])
 	
 	const u_char *packet;
 	struct pcap_pkthdr hdr;
-
-	int count = 1000000;
+	polv_validate_filter(extern_argc,extern_argv);
+	/*
+	int count = 1;
 	
 	dev = argv[1];
 	
 	printf("Device: %s\n\n",dev);
-	
+
 	capture = pcap_open_live(dev,BUFSIZ, 0, 1000, errbuf);
     
 	if (capture == NULL) {
@@ -66,6 +69,7 @@ int main(int argc, char *argv[])
 	pcap_close(capture);
 	
 	printf("\n");
+	*/
 	return EXIT_SUCCESS;
 }
 
@@ -73,7 +77,7 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 			  const u_char* packet)
 {
 	struct polv_packet* p;
-	p = polv_packet_create(packet,header->len);
+	//p = polv_packet_create(packet,header->len);
 	/*
 	printf("\tPACK ORIGINAL: \n");
 	print_packet(packet,header->len);
@@ -89,7 +93,7 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 		printf("No tiene data");
 	}
 	*/
-	polv_packet_destroy(p);
+	//polv_packet_destroy(p);
 	
 	return;
 }
