@@ -6,7 +6,7 @@
 #include "data_link/polv_data_link.h"
 #include "network/polv_network.h"
 #include "transport/polv_transport.h"
-
+#include <ctime>
 
 struct polv_packet {
 	struct polv_data_link* data_link;
@@ -17,7 +17,6 @@ struct polv_packet {
 	const u_char* raw_packet;
 	int raw_packet_len;
 };
-
 
 /* Funciones para el manejo de la estructura */
 void polv_packet_destroy(struct polv_packet*);
