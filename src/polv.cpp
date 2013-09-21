@@ -4,13 +4,22 @@
 
 #include "io/polv_io.h"
 #include "packet/polv_packet.h"
+#include "filter/polv_filter.h"
 
 #define DEVICE_MODIFIER "-i\0"
 
 void callback (u_char*, const struct pcap_pkthdr*, const u_char*);
 
+char** extern_argv;
+int extern_argc;
+
 int main(int argc, char *argv[]) {
 
+	extern_argv = argv;
+	extern_argc = argc;
+	
+	polv_validate_filter(argc,argv);
+	
   char *dev;                       // Nombre de la interfaz de la que se capturaran los paquetes
   char errbuf[PCAP_ERRBUF_SIZE];   // Texto de error de libpcap
   pcap_t *handler;                 // Manejador de sesion de libpcap
@@ -22,17 +31,17 @@ int main(int argc, char *argv[]) {
 
   dev = argv[1];
   count_pack = atoi(argv[2]);
-  if(argc >= 4) {
-    if(argc == 4) {
-      fileName = argv[3];
+  //if(argc >= 4) {
+  //  if(argc == 4) {
+  //    fileName = argv[3];
       offline = 0;
-    } else {
-      offline = 1;
-      fileName = argv[4];
-    }
-  } else {
-    fileName = NULL;
-  }
+  //  } else {
+	  // offline = 1;
+	  // fileName = argv[4];
+   // }
+	  //} else {
+	     fileName = NULL;
+	// }
 
   if(offline) {
     printf("Archivo: %s\n", fileName);
@@ -79,13 +88,16 @@ void callback(u_char *args, const struct pcap_pkthdr *header, const u_char *pack
   // Se aplica el filtro
   
   // Se parsea el paquete si paso el filtro
-	struct polv_packet* polv_p;	
-	polv_p = polv_packet_create(packet, header->len);
-
-  // Imprime en archivo o en stdout
-  if(args == NULL) {
-    write_packet(polv_p);
-  } else {
-    pcap_dump(args, header, packet);   
-  }
+	struct polv_packet* p;	
+	if (polv_filter(packet,header->len,extern_argc,extern_argv)) {
+		p = polv_packet_create(packet, header->len);
+		
+		// Imprime en archivo o en stdout
+		if(args == NULL) {
+			write_packet(p);
+		} else {
+			pcap_dump(args, header, packet);   
+		}
+		polv_packet_destroy(p);
+	}
 }

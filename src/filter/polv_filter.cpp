@@ -255,13 +255,11 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 	if (ether_pos != -1) {
 		if (strcmp(polv_v802,argv[ether_pos + 1]) == 0) {
 		    if (ethertype != V802) {
-				printf("ACA PASO 1\n");
 				return FALSE;
 			}
 			
 		} else if (strcmp(polv_vII,argv[ether_pos + 1]) == 0) {
 			if (ethertype != VII) {
-				printf("ACA PASO 2\n");
 				return FALSE;
 				
 			}
@@ -280,40 +278,36 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 	
 	if (net_pos != -1) {
 		if (ethertype == UNKNOWN_LINK) {
-			printf("ACA PASO 3\n");
 			return FALSE;
 		}
 		switch (net_protocol) {
 		case ARP:
 			if (strcmp(polv_arp,argv[net_pos + 1]) == 0) {
-				printf("ACA PASO 4\n");
 				return TRUE;
 			} else {
-				printf("ACA PASO 5\n");
 				return FALSE;
 			}
 		case RARP:
 			if (strcmp(polv_rarp,argv[net_pos + 1]) == 0) {
-				printf("ACA PASO 6\n");
 				return TRUE;
 			} else {
-				printf("ACA PASO 7\n");
 				return FALSE;
 			}
 		case IPV4:
 			if (strcmp(polv_ip4,argv[net_pos + 1]) != 0) { 
-				printf("ACA PASO 8\n");
-				return FALSE;
+				if (strcmp(polv_icmp,argv[net_pos + 1]) != 0) {
+					return FALSE;
+				}
 			}
 			break;
 		case IPV6:
 			if (strcmp(polv_ip6,argv[net_pos + 1]) != 0) {
-				printf("ACA PASO 9\n");
-				return FALSE;
+				if (strcmp(polv_icmp,argv[net_pos + 1]) != 0) {
+					return FALSE;
+				}
 			}
 			break;
 		case UNKNOWN_NET:
-			printf("ACA PASO 10\n");
 			return FALSE;
 		}
 	}
@@ -327,7 +321,6 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 	/* Comprobamos que sea ipv4 y  arp, ademas tenga la ip fuente solicitada */
 	if (src_ip_pos != -1) {
 		if (!((net_protocol == IPV4) || (net_protocol == ARP))) {
-				printf("ACA PASO 11\n");
 				polv_next_layer_destroy(next_layer);
 			return FALSE;
 		} else {
@@ -335,7 +328,6 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 			if (net_protocol == IPV4) {
 				ip_src = polv_ip_v4_src_addr(next_layer->packet);
 				if (!(compare_ips(ip_src,argv[src_ip_pos + 1]))) {
-					printf("ACA PASO 12\n");
 					polv_next_layer_destroy(next_layer);
 					free((u_char*)ip_src);
 					return FALSE;
@@ -345,7 +337,6 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 			if (net_protocol == ARP) {
 				ip_src = polv_arp_spa(next_layer->packet);
 				if (!(compare_ips(ip_src,argv[src_ip_pos + 1]))) {
-					printf("ACA PASO 13\n");
 					polv_next_layer_destroy(next_layer);
 					free((u_char*)ip_src);
 					return FALSE;
@@ -358,15 +349,13 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 	/* Comprobamos que sea ipv4 y  arp, ademas tenga la ip destino solicitada */
 	if (dst_ip_pos != -1) {
 		if (!((net_protocol == IPV4) || (net_protocol == ARP))) {
-				printf("ACA PASO 14\n");
 				polv_next_layer_destroy(next_layer);
 			return FALSE;
 		} else {
 			const u_char* ip_dst;
 			if (net_protocol == IPV4) {
-				ip_dst = polv_ip_v4_src_addr(next_layer->packet);
-				if (!(compare_ips(ip_dst,argv[src_ip_pos + 1]))) {
-					printf("ACA PASO 15\n");
+				ip_dst = polv_ip_v4_dst_addr(next_layer->packet);
+				if (!(compare_ips(ip_dst,argv[dst_ip_pos + 1]))) {
 					polv_next_layer_destroy(next_layer);
 					free((u_char*)ip_dst);
 					return FALSE;
@@ -374,9 +363,8 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 				free((u_char*)ip_dst);
 			}
 			if (net_protocol == ARP) {
-				ip_dst = polv_arp_spa(next_layer->packet);
-				if (!(compare_ips(ip_dst,argv[src_ip_pos + 1]))) {
-					printf("ACA PASO 16\n");
+				ip_dst = polv_arp_tha(next_layer->packet);
+				if (!(compare_ips(ip_dst,argv[dst_ip_pos + 1]))) {
 					polv_next_layer_destroy(next_layer);
 					free((u_char*)ip_dst);
 					return FALSE;
@@ -400,8 +388,9 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 		transport_protocol = polv_transport_protocol(ip_protocol);
 		free((u_char*)ip_protocol);
 	} else {
-		printf("\n\n\nEsto no debio haber sucedido\n\n");
-		exit(EXIT_FAILURE);
+		printf("ACA PASO 16.1\n");
+		polv_next_layer_destroy(next_layer);
+		return FALSE;
 	}
 
 	
@@ -443,9 +432,13 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 	if (net_pos != -1) {
 		if ((strcmp(polv_icmp,argv[net_pos + 1]) == 0)) {
 			if (transport_protocol == ICMP) {
-				printf("ACA PASO 22\n");
+				printf("ACA PASO 22.1\n");
 				polv_next_layer_destroy(next_layer);
 				return TRUE;
+			} else {
+				printf("ACA PASO 22.2\n");
+				polv_next_layer_destroy(next_layer);
+				return FALSE;	 
 			}
 		}
 	}
