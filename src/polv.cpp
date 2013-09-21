@@ -13,7 +13,16 @@ const char* writeFile_term = "-w\0";
 
 void callback (u_char*, const struct pcap_pkthdr*, const u_char*);
 
+char** extern_argv;
+int extern_argc;
+
 int main(int argc, char *argv[]) {
+
+	extern_argv = argv;
+	extern_argc = argc;
+	
+	polv_validate_filter(argc,argv);
+	
   char errbuf[PCAP_ERRBUF_SIZE];   // Texto de error de libpcap
   char *dev;                       // Nombre de la interfaz de la que se capturaran los paquetes
   char *readFileName;              // Nombre de archivo donde se leera
@@ -118,16 +127,16 @@ int main(int argc, char *argv[]) {
 }
 
 void callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-  // Se aplica el filtro
-  
-  // Se parsea el paquete si paso el filtro
-	struct polv_packet* polv_p;
-	polv_p = polv_packet_create(packet, header->len);
-
-  // Imprime en archivo o en stdout
-  if(args == NULL) {
-    write_packet(polv_p);
-  } else {
-    pcap_dump(args, header, packet);   
-  }
+	struct polv_packet* p;	
+	if (polv_filter(packet,header->len,extern_argc,extern_argv)) {
+		p = polv_packet_create(packet, header->len);
+		
+		// Imprime en archivo o en stdout
+		if(args == NULL) {
+			write_packet(p);
+		} else {
+			pcap_dump(args, header, packet);   
+		}
+		polv_packet_destroy(p);
+	}
 }

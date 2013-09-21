@@ -187,11 +187,14 @@ void write_arp(struct polv_arp* arp) {
 }
 
 void write_transport(struct polv_transport* transport) {
-  printf("\n::::: TRANSPORTE <");
   
-  if (transport == NULL) {
-    printf("Protocolo de transporte no reconocido\n");
-    return;
+
+	printf("\n::::: TRANSPORTE <");
+
+	
+	if (transport == NULL) {
+		printf("Protocolo de transporte no reconocido\n");
+		return;
 	}
 	
 	switch(transport->protocol) {
@@ -229,7 +232,7 @@ void write_udp(struct polv_udp* udp) {
 }
 
 void write_icmp(struct polv_icmp* icmp) {
-  printf("ICMP\n");
+  printf("ICMP>\n");
   
   printf("Type: ");
 	write_int(icmp->type, "", TYPE_ICMP_LEN);
