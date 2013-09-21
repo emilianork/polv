@@ -421,6 +421,10 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 				return FALSE;	
 			}
 			break;
+		case ICMP:
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+			break;
 		case UNKNOWN_TRANS:
 
 			polv_next_layer_destroy(next_layer);
