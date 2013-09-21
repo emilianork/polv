@@ -1,7 +1,16 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Encabezado para describir el protocolo de red IP V6
+*/
+
+
 #include "tools/polv_types.h"
 
 #include "tools/polv_next_layer.h"
 
+/* Macros de posicion de datos */
 #define VERSION_V6 0
 #define TRAFFIC_CLASS 0 
 #define FLOW_LABEL 1
@@ -20,8 +29,10 @@
 #define SRC_ADDR_V6_LEN 16
 #define DST_ADDR_V6_LEN 16
 
+/* Macros de longitud de los datos */
 #define IPV6_HEADER_LEN 40
 
+/* Estructura para describir el protocolo ip v6*/
 struct polv_ip_v6 {
 	const u_char* version;
 	const u_char* traffic_class;
@@ -33,9 +44,12 @@ struct polv_ip_v6 {
 	const u_char* dst_addr;
 };
 
+/*Funciones para inicializar y destruir esta estructura */
 struct polv_ip_v6* polv_ip_v6_init();
 void polv_ip_v6_destroy(struct polv_ip_v6*);
 
+/*Funciones para obtener los valores requeridos, a partir del encabezado
+  solo de red, sin el encabezado de ethernet*/
 const u_char* polv_ip_v6_version(const u_char*);
 const u_char* polv_ip_v6_traffic_class(const u_char*);
 const u_char* polv_ip_v6_flow_label(const u_char*);
@@ -45,4 +59,5 @@ const u_char* polv_ip_v6_hop_limit(const u_char*);
 const u_char* polv_ip_v6_src_addr(const u_char*);
 const u_char* polv_ip_v6_dst_addr(const u_char*);
 
+/*Funciona para obtener el encabezado de la capa de transporte */
 void polv_ip_v6_next_layer(struct polv_next_layer*);

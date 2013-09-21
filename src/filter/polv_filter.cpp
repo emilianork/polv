@@ -1,3 +1,10 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Implementacion de las funciones del encabezado con el mismo nombre.
+*/
+
 #include "filter/polv_filter.h"
 #include "tools/polv_boolean.h"
 #include "data_link/polv_data_link.h"
@@ -6,8 +13,6 @@
 #include "network/polv_ip_v6.h"
 #include "network/polv_arp.h"
 #include "transport/polv_transport.h"
-//#include "transport/polv_udp.h"
-//#include "transport/polv_tcp.h"
 
 #include <cstring>
 
@@ -44,8 +49,10 @@ void validate_ip(const char*);
 /*Valida puerto*/
 void validate_port(const char*);
 
+/*Compara ips*/
 int compare_ips(const u_char*,char*);
 
+/*Compara puertos*/
 int compare_port(const u_char*,char*);
 
 void polv_validate_filter(int argc, char *argv[])

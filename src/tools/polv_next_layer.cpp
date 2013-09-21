@@ -1,3 +1,10 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Implementacion de las funciones del encabezado con el mismo nombre.
+*/
+
 #include "tools/polv_next_layer.h"
 
 #include <cstdlib>

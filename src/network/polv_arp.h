@@ -1,6 +1,18 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Estructura que representa el protocolo ARP
+*/
+
+#ifndef POLV_ARP_H_
+#define POLV_ARP_H_
+
 #include "tools/polv_types.h"
 
 #include "network/polv_network.h"
+
+/* Macros de posicion de los datos */
 
 #define HTYPE 0
 #define PTYPE 2
@@ -12,6 +24,7 @@
 #define THA 18
 #define TPA 24
 
+/* Macros de longitud de los datos */
 #define HTYPE_LEN 2
 #define PTYPE_LEN 2
 #define HLEN_LEN 1
@@ -24,6 +37,7 @@
 
 #define ARP_HEADER_LEN 28
 
+/* Estructura para describir el protocolo arp*/
 struct polv_arp {
 	const u_char* htype;
 	const u_char* ptype;
@@ -34,11 +48,14 @@ struct polv_arp {
 	const u_char* spa;
 	const u_char* tha;
 	const u_char* tpa;
-	struct polv_network* network_layer;
 };
 
+/*Funciones para inicializar y destruir esta estructura */
 struct polv_arp* polv_arp_init();
 void polv_arp_destroy(struct polv_arp*);
+
+/*Funciones para obtener los valores requeridos, a partir del encabezado
+  solo de red, sin el encabezado de ethernet*/
 
 const u_char* polv_arp_htype(const u_char*);
 const u_char* polv_arp_ptype(const u_char*);
@@ -50,3 +67,4 @@ const u_char* polv_arp_spa(const u_char*);
 const u_char* polv_arp_tha(const u_char*);
 const u_char* polv_arp_tpa(const u_char*);
 
+#endif POLV_ARP_H_

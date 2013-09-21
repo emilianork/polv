@@ -1,3 +1,10 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Implementacion de las funciones del encabezado con el mismo nombre.
+*/
+
 #include "data_link/polv_data_link.h"
 
 #include "network/polv_network.h"

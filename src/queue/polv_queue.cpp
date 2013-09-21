@@ -1,3 +1,10 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Implementacion de las funciones del encabezado con el mismo nombre.
+*/
+
 #include "queue/polv_queue.h"
 #include "tools/polv_boolean.h"
 

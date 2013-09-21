@@ -1,3 +1,10 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Estructura que representa la generalizacion de la capa red
+*/
+
 #ifndef POLV_NETWORK_H_
 #define POLV_NETWORK_H_
 
@@ -17,6 +24,7 @@ struct polv_network {
 	void* header;
 };
 
+/* Funciones para la inicializacion y destruccion de la estructura */
 struct polv_network* polv_network_init();
 void polv_network_destroy(struct polv_network*);
 

@@ -1,3 +1,10 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Encabezado para describir los paquetes de polv.
+*/
+
 #ifndef POLV_PACKET_H_
 #define POLV_PACKET_H_
 
@@ -8,6 +15,7 @@
 #include "transport/polv_transport.h"
 #include <ctime>
 
+/*Estructura que representa un paquete capturado */
 struct polv_packet {
 	struct polv_data_link* data_link;
 	struct polv_network* network;
@@ -18,9 +26,8 @@ struct polv_packet {
 	int raw_packet_len;
 };
 
-/* Funciones para el manejo de la estructura */
+/* Funciones para destruir y crear la estructura */
 void polv_packet_destroy(struct polv_packet*);
-
 struct polv_packet* polv_packet_create(const u_char*, int);
 
 #endif POLV_PACKET_H_

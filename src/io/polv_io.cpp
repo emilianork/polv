@@ -1,3 +1,11 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Implementacion de las funciones del encabezado con el mismo nombre.
+*/
+
+
 #include "io/polv_io.h"
 
 #include <cstdlib>

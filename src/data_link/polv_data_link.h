@@ -1,9 +1,17 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Encabezado para modelar la capa de enlace
+*/
+
 #ifndef POLV_DATA_LINK_H_
 #define POLV_DATA_LINK_H_
 
 #include "tools/polv_types.h"
 #include "tools/polv_next_layer.h"
 
+/* Macros para las funciones*/
 #define MAC_ADDRESS 6
 #define TYPE_LEN 2
 #define DSAP_LEN 1
@@ -27,6 +35,7 @@ enum polv_ethertype {
 	UNKNOWN_LINK
 };
 
+/* Estructura para representar ambos protocolos 802 y vII */
 struct polv_data_link {
 	const u_char *dst;
 	const u_char *src;
@@ -45,6 +54,7 @@ void polv_data_link_destroy(struct polv_data_link*);
 
 /* Funciones para obtener los datos del encabezado MAC*/
 /* @param  El paquete capturado con libpcap */
+/* @return La cadena solicitada*/
 
 const u_char* polv_ether_dst(const u_char*);
 const u_char* polv_ether_src(const u_char*);
@@ -54,8 +64,9 @@ const u_char* polv_dsap(const u_char*);
 const u_char* polv_ssap(const u_char*);
 const u_char* polv_control(const u_char*);
 const u_char* polv_org_code(const u_char*);
-void polv_network_packet(const u_char*,
-						 struct polv_next_layer*,
+
+/* Función para obtener el encabezado de la siguiente capa */
+void polv_network_packet(const u_char*, struct polv_next_layer*,
 						 enum polv_ethertype, int);
 
 #endif POLV_DATA_LINK_H_

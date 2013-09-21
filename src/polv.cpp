@@ -1,3 +1,11 @@
+/*
+  José Emiliano Cabrera Blancas
+  Diego Andrés Gómez Montesinos 
+  
+  Programa principal.
+*/
+
+
 #include <cstdlib>
 #include <pcap.h>
 #include <iostream>
