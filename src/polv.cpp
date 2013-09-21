@@ -5,6 +5,8 @@
 #include "io/polv_io.h"
 #include "packet/polv_packet.h"
 
+#define DEVICE_MODIFIER "-i\0"
+
 void callback (u_char*, const struct pcap_pkthdr*, const u_char*);
 
 int main(int argc, char *argv[]) {
