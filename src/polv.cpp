@@ -6,7 +6,10 @@
 #include "packet/polv_packet.h"
 #include "filter/polv_filter.h"
 
-#define DEVICE_MODIFIER "-i\0"
+const char* device_term = "-i\0";
+const char* readFile_term = "-r\0";
+const char* count_term = "-c\0";
+const char* writeFile_term = "-w\0";
 
 void callback (u_char*, const struct pcap_pkthdr*, const u_char*);
 
@@ -20,74 +23,110 @@ int main(int argc, char *argv[]) {
 	
 	polv_validate_filter(argc,argv);
 	
-  char *dev;                       // Nombre de la interfaz de la que se capturaran los paquetes
   char errbuf[PCAP_ERRBUF_SIZE];   // Texto de error de libpcap
+  char *dev;                       // Nombre de la interfaz de la que se capturaran los paquetes
+  char *readFileName;              // Nombre de archivo donde se leera
+  char *writeFileName;             // Nombre de archivo donde se escribira
+  pcap_dumper_t *pcap_file;        // Archivo donde se guardaran las capturas
   pcap_t *handler;                 // Manejador de sesion de libpcap
   int count_pack;                  // Numero de paquetes que seran capturados
+
+  // Buscamos los primeros modificadores
+  int index_device_term = search_terms(device_term, argc, argv);
+  int index_readFile_term = search_terms(readFile_term, argc, argv);
   
-  int offline;                     // Leer de archivo
-  char *fileName;                  // Nombre de archivo donde se escribira
-  pcap_dumper_t *pcap_file;        // Archivo donde se guardaran las capturas
-
-  dev = argv[1];
-  count_pack = atoi(argv[2]);
-  //if(argc >= 4) {
-  //  if(argc == 4) {
-  //    fileName = argv[3];
-      offline = 0;
-  //  } else {
-	  // offline = 1;
-	  // fileName = argv[4];
-   // }
-	  //} else {
-	     fileName = NULL;
-	// }
-
-  if(offline) {
-    printf("Archivo: %s\n", fileName);
-    handler = pcap_open_offline(fileName, errbuf);
-  } else {
-    printf("Interfaz de red: %s\n", dev);
-    handler = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf); // Abrimos la interfaz de red para capturar
+  if(index_device_term != -1 && index_readFile_term != -1) {
+    fprintf(stderr, "Solo se debe de especificar una fuente de paquetes (interfaz o archivo)\n");
+    return(2);
   }
-
+  
+  // Determinando de donde sacaremos los paquetes
+  if(index_device_term != -1) {
+    // Se guarda la interfaz especificada por el usuario
+    dev = argv[index_device_term + 1];
+    readFileName = NULL;
+    
+  } else if(index_readFile_term != -1) {
+    // Se especifico un archivo para leer
+    readFileName = argv[index_readFile_term + 1];
+    
+  } else {
+    // El usuario no indico una interfaz ni un archivo para leer entonces se intenta asignar una
+    dev = pcap_lookupdev(errbuf);
+    if(dev == NULL) {
+      fprintf(stderr, "No se encontro una interfaz de red disponible: %s\n", errbuf);
+      return(2);
+    }
+    readFileName = NULL;
+  }
+  
+  int index_writeFile_term = search_terms(writeFile_term, argc, argv);
+  if(index_writeFile_term != -1) {
+    writeFileName = argv[index_writeFile_term + 1];
+  } else {
+    writeFileName = NULL;
+  }
+  
+  int index_count_term = search_terms(count_term, argc, argv);
+  if(index_count_term != -1) {
+    count_pack = atoi(argv[index_count_term + 1]);
+  } else {
+    count_pack = -1;
+  }
+  
+  // Iniciando el programa
+  
+  // Abrimos nuestra fuente de paquetes
+  if(readFileName != NULL) {
+    printf("\nArchivo: %s\n", readFileName);
+    handler = pcap_open_offline(readFileName, errbuf);
+  } else {
+    printf("\nInterfaz de red: %s\n", dev);
+    handler = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
+  }
+    
+  // Caso de que no se haya podido abrir la fuente de paquetes
   if(handler == NULL) {
-    if(offline) {
-      fprintf(stderr, "No se pudo abrir el archivo %s: %s\n", fileName, errbuf);
+    if(readFileName != NULL) {
+      fprintf(stderr, "No se pudo abrir el archivo %s: %s\n", readFileName, errbuf);
     } else {
       fprintf(stderr, "No se pudo abrir la interfaz de red %s: %s\n", dev, errbuf);
     }
     return(2);
   }
-
-  if(fileName == NULL) {
-    printf("Se capturaran %d paquetes\n\n\n", count_pack);
-    pcap_loop(handler, count_pack, callback, NULL);  // Capturamos count_pack paquetes
-  } else {
-    if(offline) {
-      pcap_loop(handler, -1, callback, NULL);  // Capturamos count_pack paquetes
-    } else {
-      pcap_file = pcap_dump_open(handler, fileName);
-      if(pcap_file == NULL) {
-        fprintf(stderr,"\nError opening output file\n");
-        return(2);
-      }
   
-      printf("Se capturaran %d paquetes y se guardaran en %s\n\n\n", count_pack, fileName);
-      pcap_loop(handler, count_pack, callback, (u_char*) pcap_file);  // Capturamos count_pack paquetes
+  // Abrimos archivo para escribir si se requirio
+  if(writeFileName != NULL) {
+    pcap_file = pcap_dump_open(handler, writeFileName);
+    
+    if(pcap_file == NULL) {
+      fprintf(stderr, "No se puede escribir en el archivo %s: %s\n", writeFileName, errbuf);
+      return(2);
     }
   }
   
-  printf("\n\nFINALIZANDO\n");
+  // Comienzan las capturas
+  if(readFileName != NULL) {
+    if(writeFileName != NULL) {
+      pcap_loop(handler, -1, callback, (u_char*) pcap_file);
+    } else {
+      pcap_loop(handler, -1, callback, NULL);
+    }
+  } else {
+    if(writeFileName != NULL) {
+      pcap_loop(handler, count_pack, callback, (u_char*) pcap_file);
+    } else {
+      pcap_loop(handler, count_pack, callback, NULL);
+    }
+  }
+  
+  printf("\n.: ADIOS :.\n");
   pcap_close(handler);  // Cerramos la sesion  
 
   return EXIT_SUCCESS;
 }
 
 void callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-  // Se aplica el filtro
-  
-  // Se parsea el paquete si paso el filtro
 	struct polv_packet* p;	
 	if (polv_filter(packet,header->len,extern_argc,extern_argv)) {
 		p = polv_packet_create(packet, header->len);
