@@ -1,5 +1,5 @@
 #ifndef POLV_ICMP_H_
-#define POLV_ICMP_H
+#define POLV_ICMP_H_
 
 #include "tools/polv_types.h"
 #include "tools/polv_next_layer.h"
@@ -30,4 +30,3 @@ const u_char* polv_icmp_checksum(const u_char*);
 void polv_icmp_data(struct polv_next_layer*);
 
 #endif POLV_ICMP_H_
-
