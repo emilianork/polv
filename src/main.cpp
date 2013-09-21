@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
 	const u_char *packet;
 	struct pcap_pkthdr hdr;
 	polv_validate_filter(extern_argc,extern_argv);
-	/*
-	int count = 1;
+	
+	int count = 20;
 	
 	dev = argv[1];
 	
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	pcap_close(capture);
 	
 	printf("\n");
-	*/
+	
 	return EXIT_SUCCESS;
 }
 
@@ -77,6 +77,11 @@ void callback(u_char *user, const struct pcap_pkthdr* header,
 			  const u_char* packet)
 {
 	struct polv_packet* p;
+	if (polv_filter(packet,header->len,extern_argc,extern_argv)) {
+		printf("PAQUETE CORRECTO\n");
+	} else {
+		printf("PAQUETE ERRONEO\n");
+	}
 	//p = polv_packet_create(packet,header->len);
 	/*
 	printf("\tPACK ORIGINAL: \n");

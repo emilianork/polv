@@ -2,7 +2,12 @@
 #include "tools/polv_boolean.h"
 #include "data_link/polv_data_link.h"
 #include "network/polv_network.h"
+#include "network/polv_ip_v4.h"
+#include "network/polv_ip_v6.h"
+#include "network/polv_arp.h"
 #include "transport/polv_transport.h"
+//#include "transport/polv_udp.h"
+//#include "transport/polv_tcp.h"
 
 #include <cstring>
 
@@ -33,14 +38,15 @@ const char* polv_src_port = "-s\0";
 const char* polv_dst_port = "-d\0";
 
 
-/* Regresa la posicion donde se encuentra el termino, -1 en caso de no encontrarlo*/
-int search_terms(const char*,int, char**);
-
 /* Valida ip*/
 void validate_ip(const char*);
 
 /*Valida puerto*/
 void validate_port(const char*);
+
+int compare_ips(const u_char*,char*);
+
+int compare_port(const u_char*,char*);
 
 void polv_validate_filter(int argc, char *argv[])
 {
@@ -87,7 +93,8 @@ void polv_validate_filter(int argc, char *argv[])
 		} else if (strcmp(polv_arp,argv[net_pos + 1]) == 0) {
 			net_protocol = ARP;
 		} else if (strcmp(polv_rarp,argv[net_pos + 1]) == 0) {
-			net_protocol = RARP;
+		    std::cout << "Protocolo de red inválido" << std::endl;
+			exit(EXIT_FAILURE);
 		} else if (strcmp(polv_icmp,argv[net_pos + 1]) == 0) {
 			net_protocol = UNKNOWN_NET;
 			transport_protocol = ICMP;
@@ -167,32 +174,6 @@ void polv_validate_filter(int argc, char *argv[])
 		} else {
 		}
 	}
-	
-	/*Valido que net y -S no tengan choques como: 
-	  - ARP y RARP no pueden ir con -S*/
-	if ((src_ip_pos != -1) && (net_pos != -1)) {
-	    if (net_protocol == ARP) {
-			std::cout << "Sintaxis erronea" << std::endl;
-			exit(EXIT_FAILURE);
-		} else if (net_protocol == RARP) {
-			std::cout << "Sintaxis erronea" << std::endl;
-			exit(EXIT_FAILURE);
-		} else {
-		}
-	}
-
-	/*Valido que net y -D no tengan choques como: 
-	  -  ARP y RARP no pueden ir con -D*/
-	if ((dst_ip_pos != -1) && (net_pos != -1)) {
-		if (net_protocol == ARP) {
-			std::cout << "Sintaxis erronea" << std::endl;
-			exit(EXIT_FAILURE);
-		} else if (net_protocol == RARP) {
-			std::cout << "Sintaxis erronea" << std::endl;
-			exit(EXIT_FAILURE);
-		} else {
-		}
-	}
 
 	/*Valido que net y -s no tengan choques como: 
 	  - ICMP, ARP y RARP no pueden ir con -s*/
@@ -247,6 +228,317 @@ void polv_validate_filter(int argc, char *argv[])
 	}
 }
 
+
+int polv_filter(const u_char* packet, int len, int argc, char** argv)
+{
+	
+	int ether_pos,net_pos, proto_pos,
+		src_ip_pos, dst_ip_pos, src_port_pos,
+		dst_port_pos;
+	
+	ether_pos = search_terms(polv_ether,argc,argv);
+	
+	net_pos = search_terms(polv_net,argc,argv);
+	proto_pos = search_terms(polv_proto,argc,argv);
+	
+	src_ip_pos = search_terms(polv_src_ip,argc,argv);
+	dst_ip_pos = search_terms(polv_dst_ip,argc,argv);
+	
+	src_port_pos = search_terms(polv_src_port,argc,argv);
+	dst_port_pos = search_terms(polv_dst_port,argc,argv);
+	
+	enum polv_ethertype ethertype;
+
+	ethertype = polv_ether_ver(packet);
+	
+	/* Checa que la version de ethernet sea la que se pide*/
+	if (ether_pos != -1) {
+		if (strcmp(polv_v802,argv[ether_pos + 1]) == 0) {
+		    if (ethertype != V802) {
+				printf("ACA PASO 1\n");
+				return FALSE;
+			}
+			
+		} else if (strcmp(polv_vII,argv[ether_pos + 1]) == 0) {
+			if (ethertype != VII) {
+				printf("ACA PASO 2\n");
+				return FALSE;
+				
+			}
+		} else {
+		}
+	}
+	
+	enum polv_net_protocol net_protocol;
+	const u_char* network_protocol;
+	
+	network_protocol = polv_ethertype(packet,ethertype);
+	net_protocol = polv_network_protocol(network_protocol);
+	free((u_char*)network_protocol);
+	
+	/* Checa que la version de protocolo de red  sea la que se pide*/
+	
+	if (net_pos != -1) {
+		if (ethertype == UNKNOWN_LINK) {
+			printf("ACA PASO 3\n");
+			return FALSE;
+		}
+		switch (net_protocol) {
+		case ARP:
+			if (strcmp(polv_arp,argv[net_pos + 1]) == 0) {
+				printf("ACA PASO 4\n");
+				return TRUE;
+			} else {
+				printf("ACA PASO 5\n");
+				return FALSE;
+			}
+		case RARP:
+			if (strcmp(polv_rarp,argv[net_pos + 1]) == 0) {
+				printf("ACA PASO 6\n");
+				return TRUE;
+			} else {
+				printf("ACA PASO 7\n");
+				return FALSE;
+			}
+		case IPV4:
+			if (strcmp(polv_ip4,argv[net_pos + 1]) != 0) { 
+				printf("ACA PASO 8\n");
+				return FALSE;
+			}
+			break;
+		case IPV6:
+			if (strcmp(polv_ip6,argv[net_pos + 1]) != 0) {
+				printf("ACA PASO 9\n");
+				return FALSE;
+			}
+			break;
+		case UNKNOWN_NET:
+			printf("ACA PASO 10\n");
+			return FALSE;
+		}
+	}
+
+	/* Obtenemos la capa de red para las banderas -S y -D para ip 4*/
+	struct polv_next_layer* next_layer;
+	next_layer = polv_next_layer_init();
+
+	polv_network_packet(packet,next_layer,ethertype,len);
+	
+	/* Comprobamos que sea ipv4 y  arp, ademas tenga la ip fuente solicitada */
+	if (src_ip_pos != -1) {
+		if (!((net_protocol == IPV4) || (net_protocol == ARP))) {
+				printf("ACA PASO 11\n");
+				polv_next_layer_destroy(next_layer);
+			return FALSE;
+		} else {
+			const u_char* ip_src;
+			if (net_protocol == IPV4) {
+				ip_src = polv_ip_v4_src_addr(next_layer->packet);
+				if (!(compare_ips(ip_src,argv[src_ip_pos + 1]))) {
+					printf("ACA PASO 12\n");
+					polv_next_layer_destroy(next_layer);
+					free((u_char*)ip_src);
+					return FALSE;
+				}
+				free((u_char*)ip_src);
+			}
+			if (net_protocol == ARP) {
+				ip_src = polv_arp_spa(next_layer->packet);
+				if (!(compare_ips(ip_src,argv[src_ip_pos + 1]))) {
+					printf("ACA PASO 13\n");
+					polv_next_layer_destroy(next_layer);
+					free((u_char*)ip_src);
+					return FALSE;
+				}
+				free((u_char*)ip_src);
+			}
+		}
+	}
+
+	/* Comprobamos que sea ipv4 y  arp, ademas tenga la ip destino solicitada */
+	if (dst_ip_pos != -1) {
+		if (!((net_protocol == IPV4) || (net_protocol == ARP))) {
+				printf("ACA PASO 14\n");
+				polv_next_layer_destroy(next_layer);
+			return FALSE;
+		} else {
+			const u_char* ip_dst;
+			if (net_protocol == IPV4) {
+				ip_dst = polv_ip_v4_src_addr(next_layer->packet);
+				if (!(compare_ips(ip_dst,argv[src_ip_pos + 1]))) {
+					printf("ACA PASO 15\n");
+					polv_next_layer_destroy(next_layer);
+					free((u_char*)ip_dst);
+					return FALSE;
+				}
+				free((u_char*)ip_dst);
+			}
+			if (net_protocol == ARP) {
+				ip_dst = polv_arp_spa(next_layer->packet);
+				if (!(compare_ips(ip_dst,argv[src_ip_pos + 1]))) {
+					printf("ACA PASO 16\n");
+					polv_next_layer_destroy(next_layer);
+					free((u_char*)ip_dst);
+					return FALSE;
+				}
+				free((u_char*)ip_dst);
+			}
+		}
+	}
+	
+	const u_char* raw_transport_protocol;
+	enum polv_trans_protocol transport_protocol;
+	
+	
+	const u_char* ip_protocol;
+	if (net_protocol == IPV4) {
+		ip_protocol = polv_ip_v4_protocol(next_layer->packet);
+		transport_protocol = polv_transport_protocol(ip_protocol);
+		free((u_char*)ip_protocol);
+	} else if (net_protocol == IPV6){
+		ip_protocol = polv_ip_v6_next_header(next_layer->packet);	
+		transport_protocol = polv_transport_protocol(ip_protocol);
+		free((u_char*)ip_protocol);
+	} else {
+		printf("\n\n\nEsto no debio haber sucedido\n\n");
+		exit(EXIT_FAILURE);
+	}
+
+	
+	/* Verifica que sea el protocolo de transporte  se solicito */
+	if (proto_pos != -1) {
+		if (ethertype == UNKNOWN_LINK) {
+			printf("ACA PASO 17\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		}
+		if (!((net_protocol == IPV4) || (net_protocol == IPV6))) {
+			printf("ACA PASO 18\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		}
+
+		switch (transport_protocol) {
+		case UDP:
+			if (!(strcmp(polv_udp,argv[proto_pos + 1]) == 0)) {
+				printf("ACA PASO 19\n");
+				polv_next_layer_destroy(next_layer);
+				return FALSE;	
+			}
+			break;
+		case TCP:
+			if (!(strcmp(polv_tcp,argv[proto_pos + 1]) == 0)) {
+				printf("ACA PASO 20\n");
+				polv_next_layer_destroy(next_layer);
+				return FALSE;	
+			}
+			break;
+		case UNKNOWN_TRANS:
+			printf("ACA PASO 21\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		}
+	}	
+   
+	if (net_pos != -1) {
+		if ((strcmp(polv_icmp,argv[net_pos + 1]) == 0)) {
+			if (transport_protocol == ICMP) {
+				printf("ACA PASO 22\n");
+				polv_next_layer_destroy(next_layer);
+				return TRUE;
+			}
+		}
+	}
+
+	polv_transport_packet(next_layer,net_protocol);
+
+	if (src_port_pos != -1) {
+		if (ethertype == UNKNOWN_LINK) {
+			printf("ACA PASO 23\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		}
+		if (net_protocol == UNKNOWN_NET) {
+			printf("ACA PASO 24\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		}
+		
+		if (transport_protocol == UNKNOWN_TRANS) {
+			printf("ACA PASO 25\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		} else if (transport_protocol == ICMP) {
+			printf("ACA PASO 26\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		} else if (transport_protocol == UDP){
+			const u_char* udp_src_port;
+			udp_src_port = polv_udp_src_port(next_layer->packet);
+			if (!(compare_port(udp_src_port,argv[src_port_pos + 1]))) {
+				printf("ACA PASO 27\n");
+				polv_next_layer_destroy(next_layer);
+				free((u_char*)udp_src_port);
+				return FALSE;
+			}
+		} else if (transport_protocol == TCP) {
+			const u_char* tcp_src_port;
+			tcp_src_port = polv_tcp_src_port(next_layer->packet);
+			if (!(compare_port(tcp_src_port,argv[src_port_pos + 1]))) {
+				printf("ACA PASO 28\n");
+				polv_next_layer_destroy(next_layer);
+				free((u_char*)tcp_src_port);
+				return FALSE;
+			}
+		}
+	}	
+
+	if (dst_port_pos != -1) {
+		if (ethertype == UNKNOWN_LINK) {
+			printf("ACA PASO 29\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		}
+		if (net_protocol == UNKNOWN_NET) {
+			printf("ACA PASO 30\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		}
+		
+		if (transport_protocol == UNKNOWN_TRANS) {
+			printf("ACA PASO 31\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		} else if (transport_protocol == ICMP) {
+			printf("ACA PASO 32\n");
+			polv_next_layer_destroy(next_layer);
+			return FALSE;
+		} else if (transport_protocol == UDP){
+			const u_char* udp_dst_port;
+			udp_dst_port = polv_udp_dst_port(next_layer->packet);
+			if (!(compare_port(udp_dst_port,argv[dst_port_pos + 1]))) {
+				printf("ACA PASO 33\n");
+				polv_next_layer_destroy(next_layer);
+				free((u_char*)udp_dst_port);
+				return FALSE;
+			}
+		} else if (transport_protocol == TCP) {
+			const u_char* tcp_dst_port;
+			tcp_dst_port = polv_tcp_dst_port(next_layer->packet);
+			if (!(compare_port(tcp_dst_port,argv[dst_port_pos + 1]))) {
+				printf("ACA PASO 34\n");
+				polv_next_layer_destroy(next_layer);
+				free((u_char*)tcp_dst_port);
+				return FALSE;
+			}
+		}
+	}
+	
+	printf("ACA PASO 35\n");
+	polv_next_layer_destroy(next_layer);
+	return TRUE;
+}
+	
 void validate_ip(const char* ip)
 {
 	int i,j;
@@ -283,6 +575,7 @@ void validate_ip(const char* ip)
 			number[count_numbers] = ip[j];
 			count_numbers++;
 			j++;
+			free(raw_number);
 		}
 		j++;
 		original_number = atoi(number);
@@ -316,6 +609,7 @@ void validate_port(const char* port)
 			std::cout << "Sintaxis erronea" << std::endl;
 			exit(EXIT_FAILURE);
 		}
+		free(raw_number);
 	}
 
 	int number;
@@ -327,6 +621,74 @@ void validate_port(const char* port)
 	}
 }
 
+int compare_ips(const u_char* ip_packet, char* ip_arg) {
+	int* ip_numbers = (int*) malloc(sizeof(int) * 4);
+	int* ip_numbers_arg = (int*) malloc(sizeof(int) * 4);
+	
+	ip_numbers[0] = (u_char) ip_packet[0];
+	ip_numbers[1] = (u_char) ip_packet[1];
+	ip_numbers[2] = (u_char) ip_packet[2];
+	ip_numbers[3] = (u_char) ip_packet[3];
+	
+	ip_numbers_arg[0] = -1;
+	ip_numbers_arg[1] = -1;
+	ip_numbers_arg[2] = -1;
+	ip_numbers_arg[3] = -1;
+
+	int i,j;
+	int count_points = 0;
+	int count_numbers;
+	int original_number;
+	
+	char* number = (char*) malloc(sizeof(char) * 4);
+	number[0] = '\0';
+	number[1] = '\0';
+	number[2] = '\0';
+	number[3] = '\0';
+	
+	for(i = 0,j = 0; i < 4;i++, count_points++) {
+		count_numbers = 0;
+		while((ip_arg[j] != '.') && (ip_arg[j] != '\0')) {
+			number[count_numbers] = ip_arg[j];
+			count_numbers++;
+			j++;
+		}
+		j++;
+		original_number = atoi(number);
+		
+		int k;
+		for (k = 0; k < 4; k++) {
+			if (ip_numbers_arg[k] == -1) {
+				ip_numbers_arg[k] = original_number;
+				break;
+			}
+		}
+
+		number[0] = '\0';
+		number[1] = '\0';
+		number[2] = '\0';
+		number[3] = '\0';
+	}
+	free(number);
+
+	for (i = 0; i < 4; i++) {
+		if (ip_numbers_arg[i] != ip_numbers[i])
+			return FALSE;
+	}
+	return TRUE;
+}
+
+int compare_port(const u_char* original,char* filter) {
+	
+	int original_number;
+	original_number = original[0]*16 + original[1];
+	
+	int number;
+	number = atoi((char*)filter);
+	
+	return (original_number == number);
+}
+ 
 int search_terms(const char* first,int argc,char *argv[])
 {
 	int i;
