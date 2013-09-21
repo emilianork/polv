@@ -567,7 +567,7 @@ void validate_ip(const char* ip)
 			char* raw_number = (char*) malloc(sizeof(char)*2);
 			raw_number[0] = ip[j];
 			raw_number[1] = '\0';
-		    char* only_numbers = strstr("0123456789",raw_number);
+		    char* only_numbers = (char*) strstr("0123456789",raw_number);
 			if (only_numbers == NULL) {
 				std::cout << "Sintaxis erronea" << std::endl;
 				exit(EXIT_FAILURE);
@@ -604,7 +604,7 @@ void validate_port(const char* port)
 		char* raw_number = (char*) malloc(sizeof(char)*2);
 		raw_number[0] = port[j];
 		raw_number[1] = '\0';
-		char* only_numbers = strstr("0123456789",raw_number);
+		char* only_numbers = (char*) strstr("0123456789",raw_number);
 		if (only_numbers == NULL) {
 			std::cout << "Sintaxis erronea" << std::endl;
 			exit(EXIT_FAILURE);
