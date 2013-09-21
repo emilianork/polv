@@ -388,7 +388,7 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 		transport_protocol = polv_transport_protocol(ip_protocol);
 		free((u_char*)ip_protocol);
 	} else {
-		printf("ACA PASO 16.1\n");
+
 		polv_next_layer_destroy(next_layer);
 		return FALSE;
 	}
@@ -397,12 +397,12 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 	/* Verifica que sea el protocolo de transporte  se solicito */
 	if (proto_pos != -1) {
 		if (ethertype == UNKNOWN_LINK) {
-			printf("ACA PASO 17\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		}
 		if (!((net_protocol == IPV4) || (net_protocol == IPV6))) {
-			printf("ACA PASO 18\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		}
@@ -410,20 +410,19 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 		switch (transport_protocol) {
 		case UDP:
 			if (!(strcmp(polv_udp,argv[proto_pos + 1]) == 0)) {
-				printf("ACA PASO 19\n");
 				polv_next_layer_destroy(next_layer);
 				return FALSE;	
 			}
 			break;
 		case TCP:
 			if (!(strcmp(polv_tcp,argv[proto_pos + 1]) == 0)) {
-				printf("ACA PASO 20\n");
+
 				polv_next_layer_destroy(next_layer);
 				return FALSE;	
 			}
 			break;
 		case UNKNOWN_TRANS:
-			printf("ACA PASO 21\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		}
@@ -432,11 +431,11 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 	if (net_pos != -1) {
 		if ((strcmp(polv_icmp,argv[net_pos + 1]) == 0)) {
 			if (transport_protocol == ICMP) {
-				printf("ACA PASO 22.1\n");
+	    
 				polv_next_layer_destroy(next_layer);
 				return TRUE;
 			} else {
-				printf("ACA PASO 22.2\n");
+	    
 				polv_next_layer_destroy(next_layer);
 				return FALSE;	 
 			}
@@ -447,29 +446,29 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 
 	if (src_port_pos != -1) {
 		if (ethertype == UNKNOWN_LINK) {
-			printf("ACA PASO 23\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		}
 		if (net_protocol == UNKNOWN_NET) {
-			printf("ACA PASO 24\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		}
 		
 		if (transport_protocol == UNKNOWN_TRANS) {
-			printf("ACA PASO 25\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		} else if (transport_protocol == ICMP) {
-			printf("ACA PASO 26\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		} else if (transport_protocol == UDP){
 			const u_char* udp_src_port;
 			udp_src_port = polv_udp_src_port(next_layer->packet);
 			if (!(compare_port(udp_src_port,argv[src_port_pos + 1]))) {
-				printf("ACA PASO 27\n");
+
 				polv_next_layer_destroy(next_layer);
 				free((u_char*)udp_src_port);
 				return FALSE;
@@ -478,7 +477,7 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 			const u_char* tcp_src_port;
 			tcp_src_port = polv_tcp_src_port(next_layer->packet);
 			if (!(compare_port(tcp_src_port,argv[src_port_pos + 1]))) {
-				printf("ACA PASO 28\n");
+		    
 				polv_next_layer_destroy(next_layer);
 				free((u_char*)tcp_src_port);
 				return FALSE;
@@ -488,29 +487,29 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 
 	if (dst_port_pos != -1) {
 		if (ethertype == UNKNOWN_LINK) {
-			printf("ACA PASO 29\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		}
 		if (net_protocol == UNKNOWN_NET) {
-			printf("ACA PASO 30\n");
+    
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		}
 		
 		if (transport_protocol == UNKNOWN_TRANS) {
-			printf("ACA PASO 31\n");
+	    
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		} else if (transport_protocol == ICMP) {
-			printf("ACA PASO 32\n");
+
 			polv_next_layer_destroy(next_layer);
 			return FALSE;
 		} else if (transport_protocol == UDP){
 			const u_char* udp_dst_port;
 			udp_dst_port = polv_udp_dst_port(next_layer->packet);
 			if (!(compare_port(udp_dst_port,argv[dst_port_pos + 1]))) {
-				printf("ACA PASO 33\n");
+		    
 				polv_next_layer_destroy(next_layer);
 				free((u_char*)udp_dst_port);
 				return FALSE;
@@ -519,7 +518,7 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 			const u_char* tcp_dst_port;
 			tcp_dst_port = polv_tcp_dst_port(next_layer->packet);
 			if (!(compare_port(tcp_dst_port,argv[dst_port_pos + 1]))) {
-				printf("ACA PASO 34\n");
+
 				polv_next_layer_destroy(next_layer);
 				free((u_char*)tcp_dst_port);
 				return FALSE;
@@ -527,7 +526,7 @@ int polv_filter(const u_char* packet, int len, int argc, char** argv)
 		}
 	}
 	
-	printf("ACA PASO 35\n");
+
 	polv_next_layer_destroy(next_layer);
 	return TRUE;
 }
