@@ -243,14 +243,63 @@ void write_icmp(struct polv_icmp* icmp) {
   printf("ICMP>\n");
   
   printf("Type: ");
-	write_int(icmp->type, "", TYPE_ICMP_LEN);
+  switch((int) icmp->type[0]) {
+    case 0:
+      printf("Echo Reply");
+      break;
+    case 3:
+      printf("Destination Unreachable");
+      break;
+    case 4:
+      printf("Source Quanch");
+      break;
+    case 5:
+      printf("Redirect");
+      break;
+    case 8:
+      printf("Echo");
+      break;
+    case 9:
+      printf("Router Advertisement");
+      break;
+    case 10:
+      printf("Router Selection");
+      break;
+    case 11:
+      printf("Time Exceeded");
+      break;
+    case 12:
+      printf("Parameter Problem");
+      break;
+    case 13:
+      printf("Timestamp");
+      break;
+    case 14:
+      printf("Timestamp Reply");
+      break;
+    case 15:
+      printf("Information Request");
+      break;
+    case 16:
+      printf("Information Reply");
+      break;
+    case 17:
+      printf("Address Mask Request");
+      break;
+    case 18:
+      printf("Address Mask Reply");
+      break;
+    case 30:
+      printf("Traceroute");
+      break;
+  }
 
-	printf(" | Code: ");
-	write_int(icmp->code, "", CODE_ICMP_LEN);
+  printf(" | Code: ");
+  write_int(icmp->code, "", CODE_ICMP_LEN);
 
-	printf(" | Checksum: ");
-	write_int(icmp->checksum, "", CHECKSUM_ICMP_LEN);
-  
+  printf(" | Checksum: ");
+  write_int(icmp->checksum, "", CHECKSUM_ICMP_LEN);
+
   return;
 }
 
@@ -275,17 +324,43 @@ void write_tcp(struct polv_tcp* tcp) {
 	printf(" | Reserved: ");
 	write_int(tcp->reserved, "", RESERVED_TCP_LEN);
 
-	printf(" | Flags: ");
-	write_int(tcp->flags, "", FLAGS_TCP_LEN);
+	printf(" | Flags [ ");
 
-	printf(" | Window: ");
-	write_int(tcp->window, "", WINDOW_TCP_LEN);
+  int flags = (int) tcp->flags[0];
 
-	printf(" | Checksum: ");
-	write_int(tcp->checksum, "", CHECKSUM_TCP_LEN);
+  // NS
+  if(flags & 0x01)
+    printf("NS ");
+	
+  //flags = flags << 4;
+  flags = (int) tcp->flags[1];
 
-	printf(" | Urgent: ");
-	write_int(tcp->urgent, "", URGENT_TCP_LEN);
+  // S - Syn
+  if(flags & 0x02)
+    printf("SYN ");
+
+  // F - Fin
+  if(flags & 0x01)
+    printf("FIN ");
+
+  // A - ACK
+  if(flags & 0x10)
+    printf("ACK ");
+
+  // R - Reset
+  if(flags & 0x04)
+    printf("RST ");
+
+  printf("]");
+
+  printf(" | Window: ");
+  write_int(tcp->window, "", WINDOW_TCP_LEN);
+
+  printf(" | Checksum: ");
+  write_int(tcp->checksum, "", CHECKSUM_TCP_LEN);
+
+  printf(" | Urgent: ");
+  write_int(tcp->urgent, "", URGENT_TCP_LEN);
 
   return;
 }
@@ -305,13 +380,22 @@ void write_raw_data(const u_char* raw_data, int raw_data_len) {
     printf("%s  ", str_hex);
     printf("%s\n", str_ascii);
   }
+
+  // Si aun hay datos que imprimir
   if((i - BYTES_PER_LINE) < raw_data_len) {
     read_hex(str_hex, raw_data, i, raw_data_len - (i - BYTES_PER_LINE));
     read_ascii(str_ascii, raw_data, i, raw_data_len - (i - BYTES_PER_LINE));
     
     printf("\t0x%04x:  ", i);
-    printf("%s  ", str_hex);
-    printf("%s\n", str_ascii);
+    printf("%s", str_hex);
+    
+    // Acompleta los caracteres faltantes de str_hex
+    int j;
+    for(j = 0; j < BYTES_PER_LINE * 2 + ((BYTES_PER_LINE / 2) - 1) - strlen(str_hex); j++) {
+      printf(" ");
+    }
+
+    printf("  %s\n", str_ascii);
   }
   
   return;
@@ -326,21 +410,21 @@ void read_file(FILE*) {
 /////////////////////////////////////////////////////////////////////
 
 void write_hex(const u_char* content, const char* separator, int len) {
-	int i;
-	for(i = 0; i < len; i++) {
-	  printf("%02x%s", content[i], separator);
-	}
-	
-	return;
+  int i;
+  for(i = 0; i < len; i++) {
+    printf("%02x%s", content[i], separator);
+  }
+
+  return;
 }
 
 void write_int(const u_char* content, const char* separator, int len) {
-	int i;
-	for(i = 0; i < len; i++) {
-	  printf("%d%s", content[i], separator);
-	}
-	
-	return;
+  int i;
+  for(i = 0; i < len; i++) {
+    printf("%d%s", content[i], separator);
+  }
+
+  return;
 }
 
 int read_ascii(char* buffer, const u_char* content, int init, int len) {
@@ -366,7 +450,7 @@ int read_hex(char* buffer, const u_char* content, int init, int len) {
     sprintf(str_aux, "%02x", content[init + i]);
     
     if(i % 2 == 0 && i != 0) {
-      buffer[j] = (char) 32;;
+      buffer[j] = (char) 32;
       j++;
     }
     
@@ -375,7 +459,8 @@ int read_hex(char* buffer, const u_char* content, int init, int len) {
     
     j += 2;
   }
-  buffer[j + 1] = '\0';
+
+  buffer[j] = '\0';
   
   return len * 2;
 }
